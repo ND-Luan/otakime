@@ -45,6 +45,9 @@ function LoginPage() {
     if (isLoginAdmin) {
       navigate("/admin/dashboard");
     }
+    document.title = `Otakime - Login`;
+    const el = document.querySelector("meta[name='description']");
+    el.setAttribute("content", "Login admin");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

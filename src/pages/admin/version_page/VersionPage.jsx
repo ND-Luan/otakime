@@ -20,8 +20,12 @@ export default function VersionPage() {
             ),
           },
           {
-            title: "In Progress",
-            description,
+            title: "Version 1.0.1",
+            description: (
+              <div>
+                <p>Thêm version project trong admin</p>
+              </div>
+            ),
           },
           {
             title: "Waiting",

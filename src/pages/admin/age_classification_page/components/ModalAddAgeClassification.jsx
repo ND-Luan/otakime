@@ -129,7 +129,7 @@ export default function ModalAddAgeClassification() {
               backgroundColor: exampleText.bgColor,
             }}
           >
-            <p className="text-lg font-semibold">{exampleText.text}</p>
+            <p className="mb-0 text-lg font-semibold">{exampleText.text}</p>
           </Card>
         </div>
       </Form>
