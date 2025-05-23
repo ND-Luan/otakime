@@ -4,6 +4,9 @@ import React from "react";
 
 import { HeroUIProvider } from '@heroui/react';
 
+import Footer from "./footer";
+import Header from "./header";
+
 export function Providers({ children }: { children: React.ReactNode }) {
     return (
         <HeroUIProvider>
@@ -15,9 +18,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
 export default function ClientLayout({ children }: TypeClientLayout) {
     return (
         <Providers>
-            <header>Header của Client</header>
-            <main>{children}</main>
-            <footer>Footer của Client</footer>
+            <Header />
+            <main className="min-h-screen">{children}</main>
+            <Footer />
         </Providers>
     );
 }
