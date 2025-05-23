@@ -12,10 +12,12 @@ export default function MyApp({ Component, pageProps, router }: AppProps) {
   // Kiểm tra nếu là trang admin
   if (router.pathname.startsWith('/admin')) {
     return (
-      <Component {...pageProps} />
+      <AdminLayout>
+        <Component {...pageProps} />
+      </AdminLayout>
     );
   }
-
+  // console.log('router.pathname', router.pathname);
   // Mặc định là client
   return (
     <ClientLayout>
