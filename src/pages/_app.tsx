@@ -1,4 +1,4 @@
-import '../styles/globals.css';
+import '../app/globals.css'; // CSS toàn cục
 
 import 'antd/dist/reset.css'; // CSS của Ant Design
 import '../styles/client.css'; // CSS của Tailwind (client)

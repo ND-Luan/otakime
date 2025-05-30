@@ -9,10 +9,17 @@ const nextConfig: NextConfig = {
       { source: "/category", destination: "/client/category" },
       { source: "/category/:id", destination: "/client/category/:id" },
       { source: "/manga", destination: "/client/manga" },
-      // Route động: /manga/:id → /client/manga/[id]
       { source: "/manga/:id", destination: "/client/manga/:id" },
+
       { source: "/movie", destination: "/client/movie" },
+      { source: "/movie/:id", destination: "/client/movie/:id" },
+
       { source: "/team", destination: "/client/team" },
+      { source: "/team/:id", destination: "/client/team/:id" },
+
+      { source: "/blog", destination: "/client/blog" },
+      { source: "/blog/:id", destination: "/client/blog/:id" },
+
       { source: "/about", destination: "/client/about" },
 
       { source: "/login", destination: "/auth/login" },

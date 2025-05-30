@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Avatar, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input } from '@heroui/react';
 import { Link, Navbar, NavbarBrand, NavbarContent, NavbarItem } from "@heroui/react";
-
+import NextLink from "next/link";
 type SearchIconProps = {
     size?: number;
     strokeWidth?: number;
@@ -60,6 +60,15 @@ export const SearchIcon: React.FC<SearchIconProps> = ({
 };
 
 const Header: React.FC = () => {
+    const menuItems = useMemo(() => {
+        return [
+            { label: "Manga", href: "/manga" },
+            { label: "Movie", href: "/movie" },
+            { label: "Team", href: "/team" },
+            { label: "Blog", href: "/blog" },
+            { label: "About", href: "/about" },
+        ];
+    }, [])
     return (
         <Navbar isBordered>
             <NavbarContent justify="start">
@@ -68,26 +77,17 @@ const Header: React.FC = () => {
                     <p className="hidden sm:block font-bold text-inherit">ACME</p>
                 </NavbarBrand>
                 <NavbarContent className="hidden sm:flex gap-3">
-                    <NavbarItem>
-                        <Link color="foreground" href="#">
-                            Manga
-                        </Link>
-                    </NavbarItem>
-                    <NavbarItem>
-                        <Link color="foreground" href="#">
-                            Movie
-                        </Link>
-                    </NavbarItem>
-                    <NavbarItem>
-                        <Link color="foreground" href="#">
-                            Team
-                        </Link>
-                    </NavbarItem>
-                    <NavbarItem>
-                        <Link color="foreground" href="#">
-                            Blog
-                        </Link>
-                    </NavbarItem>
+                    {
+                        menuItems.map((item, index) => (
+                            <NavbarItem key={index}>
+                                <NextLink href={item.href} passHref legacyBehavior>
+                                    <a className="text-small font-semibold text-default-500 hover:text-default-700 dark:text-default-400 dark:hover:text-default-200">
+                                        {item.label}
+                                    </a>
+                                </NextLink>
+                            </NavbarItem>
+                        ))
+                    }
                 </NavbarContent>
             </NavbarContent>
 
