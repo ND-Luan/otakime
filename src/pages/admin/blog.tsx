@@ -1,7 +1,7 @@
 import { Button } from "antd";
 
-export default function MoviePage() {
+export default function BlogPage() {
     return <div>
-        MoviePage
+        BlogPage
     </div>
 }

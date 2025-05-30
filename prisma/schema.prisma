@@ -9,23 +9,31 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlserver"
-  url      = env("DATABASE_URL")
+  provider          = "sqlserver"
+  url               = env("DATABASE_URL")
   shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
+model Role {
+  id    String @id @default(uuid())
+  name  String @unique
+  users User[]
+}
+
 model User {
-  id        String  @id @default(uuid())
-  username  String  @unique
-  email     String  @unique
+  id        String   @id @default(uuid())
+  username  String   @unique
+  email     String   @unique
   password  String
   createdAt DateTime @default(now())
 
+  roleId    String?
+  role      Role?      @relation(fields: [roleId], references: [id])
   favorites Favorite[]
 }
 
 model Movie {
-  id          String  @id @default(uuid())
+  id          String   @id @default(uuid())
   title       String
   description String?
   releaseDate DateTime
@@ -33,25 +41,25 @@ model Movie {
   movieType   String // Dùng String thay vì Enum
   createdAt   DateTime @default(now())
 
-  episodes    Episode[]
-  genres      MovieGenre[]
-  favorites   Favorite[] // Thêm mối quan hệ ngược
+  episodes  Episode[]
+  genres    MovieGenre[]
+  favorites Favorite[] // Thêm mối quan hệ ngược
 }
 
 model Episode {
-  id       String  @id @default(uuid())
-  title    String
-  number   Int
-  videoUrl String
-  movieId  String
+  id        String   @id @default(uuid())
+  title     String
+  number    Int
+  videoUrl  String
+  movieId   String
   createdAt DateTime @default(now())
 
-  movie    Movie @relation(fields: [movieId], references: [id])
+  movie Movie @relation(fields: [movieId], references: [id])
 }
 
 model Genre {
-  id   String  @id @default(uuid())
-  name String  @unique
+  id   String @id @default(uuid())
+  name String @unique
 
   movies MovieGenre[]
   mangas MangaGenre[]
@@ -68,17 +76,18 @@ model MovieGenre {
 }
 
 model Manga {
-  id          String  @id @default(uuid())
+  id          String   @id @default(uuid())
   title       String
   author      String?
   description String?
   coverUrl    String?
   createdAt   DateTime @default(now())
 
-  chapters    Chapter[]
-  genres      MangaGenre[]
-  favorites   Favorite[] // Thêm mối quan hệ ngược
+  chapters  Chapter[]
+  genres    MangaGenre[]
+  favorites Favorite[] // Thêm mối quan hệ ngược
 }
+
 model MangaGenre {
   mangaId String
   genreId String
@@ -90,34 +99,34 @@ model MangaGenre {
 }
 
 model Chapter {
-  id       String  @id @default(uuid())
-  title    String
-  number   Int
-  mangaId  String
+  id        String   @id @default(uuid())
+  title     String
+  number    Int
+  mangaId   String
   createdAt DateTime @default(now())
 
-  manga    Manga @relation(fields: [mangaId], references: [id])
-  images   Image[]
+  manga  Manga   @relation(fields: [mangaId], references: [id])
+  images Image[]
 }
 
 model Image {
-  id        String  @id @default(uuid())
-  chapterId String
-  imageUrl  String
+  id         String   @id @default(uuid())
+  chapterId  String
+  imageUrl   String
   pageNumber Int
-  createdAt DateTime @default(now())
+  createdAt  DateTime @default(now())
 
-  chapter  Chapter @relation(fields: [chapterId], references: [id])
+  chapter Chapter @relation(fields: [chapterId], references: [id])
 }
 
 model Favorite {
-  id      String @id @default(uuid())
-  userId  String
-  movieId String?
-  mangaId String?
+  id        String   @id @default(uuid())
+  userId    String
+  movieId   String?
+  mangaId   String?
   createdAt DateTime @default(now())
 
-  user   User @relation(fields: [userId], references: [id])
-  movie  Movie? @relation(fields: [movieId], references: [id])
-  manga  Manga? @relation(fields: [mangaId], references: [id])
+  user  User   @relation(fields: [userId], references: [id])
+  movie Movie? @relation(fields: [movieId], references: [id])
+  manga Manga? @relation(fields: [mangaId], references: [id])
 }

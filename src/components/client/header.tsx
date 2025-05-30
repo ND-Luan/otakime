@@ -1,7 +1,6 @@
-import React, { useMemo } from "react";
-import { Avatar, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input } from '@heroui/react';
-import { Link, Navbar, NavbarBrand, NavbarContent, NavbarItem } from "@heroui/react";
+import { Avatar, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input, Navbar, NavbarBrand, NavbarContent, NavbarItem } from '@heroui/react';
 import NextLink from "next/link";
+import React, { useMemo } from "react";
 type SearchIconProps = {
     size?: number;
     strokeWidth?: number;
@@ -62,6 +61,7 @@ export const SearchIcon: React.FC<SearchIconProps> = ({
 const Header: React.FC = () => {
     const menuItems = useMemo(() => {
         return [
+            { label: "Home", href: "/" },
             { label: "Manga", href: "/manga" },
             { label: "Movie", href: "/movie" },
             { label: "Team", href: "/team" },
@@ -70,7 +70,24 @@ const Header: React.FC = () => {
         ];
     }, [])
     return (
-        <Navbar isBordered>
+        <Navbar isBordered
+            classNames={{
+                item: [
+                    "flex",
+                    "relative",
+                    "h-full",
+                    "items-center",
+                    "data-[active=true]:after:content-['']",
+                    "data-[active=true]:after:absolute",
+                    "data-[active=true]:after:bottom-0",
+                    "data-[active=true]:after:left-0",
+                    "data-[active=true]:after:right-0",
+                    "data-[active=true]:after:h-[2px]",
+                    "data-[active=true]:after:rounded-[2px]",
+                    "data-[active=true]:after:bg-primary",
+                ],
+            }}
+        >
             <NavbarContent justify="start">
                 <NavbarBrand className="mr-4">
                     <AcmeLogo />

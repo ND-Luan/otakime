@@ -17,6 +17,12 @@ export default function MyApp({ Component, pageProps, router }: AppProps) {
       </AdminLayout>
     );
   }
+  if (router.pathname.startsWith('/auth/login')) {
+    console.log('Đang ở trang login');
+    return (
+      <Component {...pageProps} />
+    );
+  }
   // console.log('router.pathname', router.pathname);
   // Mặc định là client
   return (
