@@ -29,7 +29,7 @@ model User {
   UserId   Int    @id @default(autoincrement())
   username String @unique
   email    String @unique
-  password String
+  password String @db.VarChar(Max)
 
   createdAt     DateTime @default(now())
   createdUserId Int?
@@ -40,7 +40,7 @@ model User {
   role      Role?      @relation(fields: [RoleId], references: [RoleId])
   favorites Favorite[]
 
-  DetailTeam DetailTeam[]
+  TeamDetail TeamDetail[]
 }
 
 model Team {
@@ -52,11 +52,11 @@ model Team {
   updatedAt     DateTime @default(now())
   updatedUserId Int?
 
-  DetailTeam DetailTeam[]
+  TeamDetail TeamDetail[]
 }
 
-model DetailTeam {
-  DetailTeamId Int @id @default(autoincrement())
+model TeamDetail {
+  TeamDetailId Int @id @default(autoincrement())
   TeamId       Int
   UserId       Int
 
