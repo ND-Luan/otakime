@@ -1,8 +1,9 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, User } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import cookie from "cookie";
+import { IApiResponse } from "@/types/response";
 
 const prisma = new PrismaClient();
 
@@ -10,14 +11,22 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  let response: IApiResponse<User> = {
+    IsSuccess: false,
+    Message: "",
+    Data: null,
+  };
+
   if (req.method !== "POST") {
-    return res.status(405).json({ message: "Method not allowed" });
+    response.Message = "Method not allowed";
+    return res.status(405).json(response);
   }
 
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return res.status(400).json({ message: "Email and password are required" });
+    response.Message = "Email and password are required";
+    return res.status(400).json(response);
   }
 
   try {
@@ -26,12 +35,14 @@ export default async function handler(
     });
 
     if (!user) {
-      return res.status(401).json({ message: "Invalid email or password" });
+      response.Message = "Invalid email or password";
+      return res.status(401).json(response);
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ message: "Invalid email or password" });
+      response.Message = "Invalid email or password";
+      return res.status(401).json(response);
     }
 
     // Tạo JWT token
@@ -49,19 +60,17 @@ export default async function handler(
         secure: process.env.NODE_ENV === "production",
         sameSite: "strict",
         path: "/",
-        maxAge: 60 * 60 * 24 * 7, // 7 days
+        maxAge: 60 * 60 * 24 * 7,
       })
     );
 
-    return res.status(200).json({
-      message: "Login successful",
-      user: {
-        UserId: user.UserId,
-        email: user.email,
-        username: user.username,
-      },
-    });
+    response.IsSuccess = true;
+    response.Message = "Login successful";
+    response.Data = user;
+    
+    return res.status(200).json(response);
   } catch (error) {
-    return res.status(500).json({ message: "Server error", error });
+    response.Message = error!.toString();
+    return res.status(500).json(response);
   }
 }

@@ -7,6 +7,6 @@ export interface IPagination {
 
 export interface IApiResponse<T> {
   IsSuccess: boolean;
-  Message: string;
-  Data: T;
+  Message: string | null;
+  Data: T | null;
 }

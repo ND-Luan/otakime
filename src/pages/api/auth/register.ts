@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, User } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { IApiResponse } from "@/types/response";
 
 const prisma = new PrismaClient();
 
@@ -8,16 +9,22 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  let response: IApiResponse<User> = {
+    IsSuccess: false,
+    Message: "",
+    Data: null,
+  };
+
   if (req.method !== "POST") {
-    return res.status(405).json({ message: "Method not allowed" });
+    response.Message = "Method not allowed";
+    return res.status(405).json(response);
   }
 
   const { username, email, password } = req.body;
 
   if (!username || !email || !password) {
-    return res
-      .status(400)
-      .json({ message: "Username, email and password are required" });
+    response.Message = "Username, email and password are required";
+    return res.status(400).json(response);
   }
 
   try {
@@ -29,9 +36,8 @@ export default async function handler(
     });
 
     if (existingUser) {
-      return res
-        .status(409)
-        .json({ message: "Email or username already exists" });
+      response.Message = "Email or username already exists";
+      return res.status(409).json(response);
     }
 
     // Hash password
@@ -48,15 +54,21 @@ export default async function handler(
         UserId: true,
         username: true,
         email: true,
+        password: true,
         createdAt: true,
+        createdUserId: true,
+        updatedAt: true,
+        updatedUserId: true,
+        RoleId: true,
       },
     });
 
-    return res.status(201).json({
-      message: "Register successful",
-      user,
-    });
+    response.IsSuccess = true;
+    response.Message = "Register successful";
+    response.Data = user;
+    return res.status(201).json(response);
   } catch (error) {
-    return res.status(500).json({ message: "Server error", error });
+    response.Message = "Server error";
+    return res.status(500).json(response);
   }
 }
