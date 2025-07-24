@@ -1,8 +1,34 @@
+import { authService } from "@/services";
+import authStore from "@/store/auth_store";
 import { Card } from "@heroui/card";
-import { Button, Image, Input } from "@heroui/react";
+import { Form, Button, Image, Input } from "@heroui/react";
 import { useRouter } from 'next/navigation'
+import { useState } from "react";
 export default function Login() {
     const router = useRouter()
+
+    const [errors, setErrors] = useState({});
+
+    const onSubmit = async (e) => {
+        e.preventDefault();
+
+        const data = Object.fromEntries(new FormData(e.currentTarget));
+
+        if (!data.email) {
+            setErrors({ email: "email is required" });
+
+            return;
+        }
+        const response = await authService.login(data.email as string, data.password as string);
+        if (response.IsSuccess) {
+            // Assuming you have a way to set the user in your auth store
+            authStore.getState().login(response.Data);
+            router.push("/admin/dashboard")
+        }
+
+        // setErrors(result.errors);
+    };
+
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-[#bca892] to-[#e6d6c3]">
             <Card className="bg-[#f5ede4] rounded-3xl shadow-2xl flex flex-row w-full max-w-5xl overflow-hidden">
@@ -12,8 +38,9 @@ export default function Login() {
                         <div className="font-logo text-3xl font-bold mb-6 text-[#6d4c2c]">Melarist</div>
                         <h2 className="text-2xl font-semibold mb-2 text-[#3d2c1e]">Create an Account</h2>
                         <p className="text-[#7c6a58] mb-6">Sign up and get 30 days free trial</p>
-                        <form className="space-y-4">
+                        <Form className="space-y-4" validationErrors={errors} onSubmit={onSubmit}>
                             <Input
+                                name="email"
                                 type="email"
                                 label="Email Address"
                                 placeholder="Enter your email"
@@ -25,6 +52,7 @@ export default function Login() {
                                 required
                             />
                             <Input
+                                name="password"
                                 type="password"
                                 label="Password"
                                 placeholder="Enter your password"
@@ -43,6 +71,7 @@ export default function Login() {
                                     </Button>
                                 }
                             />
+
                             <div className="flex flex-col gap-1 text-xs text-[#a68b6a] mb-2">
                                 <div className="flex items-center gap-2">
                                     <span className="h-2 w-2 rounded-full bg-[#bca892] inline-block" />
@@ -57,11 +86,11 @@ export default function Login() {
                                 color="warning"
                                 className="w-full font-semibold bg-[#bca892] text-white text-base rounded-lg py-2 mt-2 hover:bg-[#a68b6a] transition"
                                 size="lg"
-                                onPress={() => router.push("/admin/dashboard")}
+                                type="submit"
                             >
                                 SUBMIT
                             </Button>
-                        </form>
+                        </Form>
                         <div className="flex gap-4 mt-6">
                             <Button
                                 variant="bordered"

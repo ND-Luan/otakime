@@ -10,6 +10,7 @@ export function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
 
+  console.log("token", token);
   // Nếu có token, cho phép tiếp tục
   return NextResponse.next();
 }
