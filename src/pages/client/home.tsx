@@ -1,307 +1,520 @@
 'use client'
 
-import ClientLayout from "@/components/client/client_layout";
 import { Button } from "@heroui/button";
-import { Card, CardBody, CardHeader, Divider, Avatar, Badge, Skeleton } from "@heroui/react";
+import { Card, CardBody, CardHeader, Divider, Avatar, Badge, Skeleton, Image, Chip } from "@heroui/react";
 import React, { useEffect, useState } from "react";
 
-// Dummy data
+// Enhanced dummy data with more realistic content
+const featuredContent = [
+    {
+        id: 1,
+        title: "One Piece",
+        type: "Manga",
+        description: "Cuộc phiêu lưu của Luffy và băng Mũ Rơm trong hành trình tìm kiếm kho báu One Piece",
+        image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=600&h=400&fit=crop",
+        rating: 9.8,
+        status: "Đang cập nhật",
+        genre: ["Phiêu lưu", "Hành động", "Hài hước"]
+    },
+    {
+        id: 2,
+        title: "Your Name",
+        type: "Movie",
+        description: "Câu chuyện tình yêu kỳ diệu vượt thời gian giữa Mitsuha và Taki",
+        image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=400&fit=crop",
+        rating: 9.5,
+        status: "Hoàn thành",
+        genre: ["Romance", "Drama", "Supernatural"]
+    }
+];
+
 const topManga = [
-    { id: 1, title: "One Piece", views: 12000 },
-    { id: 2, title: "Jujutsu Kaisen", views: 9500 },
-    { id: 3, title: "Attack on Titan", views: 9000 },
+    { id: 1, title: "One Piece", views: 12000, rating: 9.8, image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=100&h=140&fit=crop" },
+    { id: 2, title: "Jujutsu Kaisen", views: 9500, rating: 9.2, image: "https://images.unsplash.com/photo-1613376023733-0a73315d9b06?w=100&h=140&fit=crop" },
+    { id: 3, title: "Attack on Titan", views: 9000, rating: 9.0, image: "https://images.unsplash.com/photo-1621952832039-6c4e99f75dd0?w=100&h=140&fit=crop" },
+    { id: 4, title: "Demon Slayer", views: 8500, rating: 8.8, image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=100&h=140&fit=crop" },
+    { id: 5, title: "Blue Lock", views: 7800, rating: 8.5, image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=100&h=140&fit=crop" }
 ];
 
 const topMovies = [
-    { id: 1, title: "Your Name", views: 8000 },
-    { id: 2, title: "Spirited Away", views: 7500 },
-    { id: 3, title: "Demon Slayer: Mugen Train", views: 7000 },
+    { id: 1, title: "Your Name", views: 8000, rating: 9.5, image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=100&h=140&fit=crop" },
+    { id: 2, title: "Spirited Away", views: 7500, rating: 9.3, image: "https://images.unsplash.com/photo-1544928147-79a2dbc1f389?w=100&h=140&fit=crop" },
+    { id: 3, title: "Demon Slayer Movie", views: 7000, rating: 9.1, image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=100&h=140&fit=crop" },
+    { id: 4, title: "Princess Mononoke", views: 6500, rating: 8.9, image: "https://images.unsplash.com/photo-1578321272176-b7bbc0679853?w=100&h=140&fit=crop" },
+    { id: 5, title: "Akira", views: 6000, rating: 8.7, image: "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=100&h=140&fit=crop" }
 ];
 
-const recommendedManga = [
-    { id: 1, title: "Blue Lock" },
-    { id: 2, title: "Chainsaw Man" },
-    { id: 3, title: "Frieren" },
+const newUpdates = [
+    { 
+        id: 1, 
+        title: "Oshi no Ko", 
+        chapter: "Ch. 150", 
+        updatedAt: "1 giờ trước",
+        image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=200&h=280&fit=crop",
+        type: "Manga",
+        rating: 9.1
+    },
+    { 
+        id: 2, 
+        title: "Kaiju No.8", 
+        chapter: "Ch. 110", 
+        updatedAt: "2 giờ trước",
+        image: "https://images.unsplash.com/photo-1621952832039-6c4e99f75dd0?w=200&h=280&fit=crop",
+        type: "Manga",
+        rating: 8.8
+    },
+    { 
+        id: 3, 
+        title: "Dandadan", 
+        chapter: "Ch. 99", 
+        updatedAt: "3 giờ trước",
+        image: "https://images.unsplash.com/photo-1613376023733-0a73315d9b06?w=200&h=280&fit=crop",
+        type: "Manga",
+        rating: 8.9
+    },
+    { 
+        id: 4, 
+        title: "Sakamoto Days", 
+        chapter: "Ch. 170", 
+        updatedAt: "5 giờ trước",
+        image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=280&fit=crop",
+        type: "Manga",
+        rating: 8.7
+    }
 ];
 
-const newManga = [
-    { id: 1, title: "Oshi no Ko", chapter: "Ch. 150", updatedAt: "1 giờ trước" },
-    { id: 2, title: "Kaiju No.8", chapter: "Ch. 110", updatedAt: "2 giờ trước" },
-    { id: 3, title: "Dandadan", chapter: "Ch. 99", updatedAt: "3 giờ trước" },
-    { id: 4, title: "Sakamoto Days", chapter: "Ch. 170", updatedAt: "5 giờ trước" },
+const upcomingContent = [
+    { 
+        id: 1, 
+        title: "Solo Leveling", 
+        type: "Manga", 
+        date: "25/06/2025", 
+        image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=200&h=280&fit=crop",
+        genre: ["Action", "Fantasy"]
+    },
+    { 
+        id: 2, 
+        title: "Haikyuu!! Movie", 
+        type: "Movie", 
+        date: "30/06/2025", 
+        image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=280&fit=crop",
+        genre: ["Sports", "Drama"]
+    },
+    { 
+        id: 3, 
+        title: "Mashle Season 2", 
+        type: "Anime", 
+        date: "10/07/2025", 
+        image: "https://images.unsplash.com/photo-1613376023733-0a73315d9b06?w=200&h=280&fit=crop",
+        genre: ["Comedy", "Magic"]
+    },
+    { 
+        id: 4, 
+        title: "Spy x Family Movie", 
+        type: "Movie", 
+        date: "15/07/2025", 
+        image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=200&h=280&fit=crop",
+        genre: ["Comedy", "Action"]
+    },
+    { 
+        id: 5, 
+        title: "Blue Box", 
+        type: "Manga", 
+        date: "20/07/2025", 
+        image: "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=200&h=280&fit=crop",
+        genre: ["Romance", "Sports"]
+    }
 ];
 
-const teamLogos = [
-    { id: 1, name: "Team Alpha", logo: "/team-alpha.png" },
-    { id: 2, name: "Team Beta", logo: "/team-beta.png" },
-    { id: 3, name: "Team Gamma", logo: "/team-gamma.png" },
-    { id: 4, name: "Team Delta", logo: "/team-delta.png" },
+const categories = [
+    { name: "Manga", count: 1250, icon: "📚", color: "primary" },
+    { name: "Movie", count: 340, icon: "🎬", color: "secondary" },
+    { name: "Anime", count: 890, icon: "📺", color: "success" },
+    { name: "Light Novel", count: 520, icon: "📖", color: "warning" }
 ];
 
-const bestTeam = {
-    name: "Team Alpha",
-    description: "Đóng góp nhiều bộ truyện chất lượng, dịch nhanh và chuẩn.",
-    logo: "/team-alpha.png",
-};
-const upcoming = [
-    { id: 1, title: "Solo Leveling", type: "Manga", date: "25/06/2025", image: "/solo-leveling.jpg" },
-    { id: 2, title: "Haikyuu!! Movie", type: "Movie", date: "30/06/2025", image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=facearea&w=200&q=80" },
-    { id: 3, title: "Mashle Season 2", type: "Manga", date: "10/07/2025", image: "https://picsum.photos/200/300?random=1" },
-    { id: 4, title: "Spy x Family Movie", type: "Movie", date: "15/07/2025", image: "https://images.unsplash.com/photo-1519125323398-675f0ddb6308?auto=format&fit=facearea&w=200&q=80" },
-    { id: 5, title: "Blue Box", type: "Manga", date: "20/07/2025", image: "https://picsum.photos/200/300?random=2" },
-];
-
-export default function Root() {
+export default function ModernHomePage() {
     const [loading, setLoading] = useState(true);
+    const [currentFeatured, setCurrentFeatured] = useState(0);
 
     useEffect(() => {
-        // Fake loading with Promise
         const timer = setTimeout(() => setLoading(false), 1500);
         return () => clearTimeout(timer);
     }, []);
 
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setCurrentFeatured((prev) => (prev + 1) % featuredContent.length);
+        }, 5000);
+        return () => clearInterval(interval);
+    }, []);
+
     return (
-        <div className="relative min-h-screen bg-gradient-to-br from-indigo-100 via-pink-50 to-yellow-50 py-8">
-            <div className="container mx-auto space-y-12 relative z-10">
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+            {/* Hero Section */}
+            <div className="relative h-[80vh] overflow-hidden">
+                {/* Background with overlay */}
+                <div 
+                    className="absolute inset-0 bg-cover bg-center transition-all duration-1000"
+                    style={{
+                        backgroundImage: `url(${featuredContent[currentFeatured]?.image})`,
+                    }}
+                >
+                    <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-transparent"></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+                </div>
 
-                {/* Banner/Slider */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <Card className="col-span-2 bg-blue-50 flex flex-row items-center p-8 shadow-lg">
-                        <div className="flex-1">
-                            <h1 className="text-3xl font-bold mb-2 text-indigo-800">OtakuMê - Đọc Manga & Movie</h1>
-                            <p className="mb-4 text-gray-600">Khám phá kho truyện tranh và phim hoạt hình chất lượng cao, cập nhật liên tục mỗi ngày!</p>
-                            <Button color="primary">Khám phá ngay</Button>
+                {/* Hero Content */}
+                <div className="relative z-10 container mx-auto px-6 h-full flex items-center">
+                    <div className="max-w-2xl text-white">
+                        <div className="mb-4">
+                            <Chip 
+                                color={featuredContent[currentFeatured]?.type === 'Manga' ? 'primary' : 'secondary'} 
+                                variant="flat" 
+                                size="lg"
+                                className="mb-4"
+                            >
+                                {featuredContent[currentFeatured]?.type}
+                            </Chip>
                         </div>
-                        <img src="/banner-manga.png" alt="Banner" className="h-40 w-auto hidden md:block" />
-                    </Card>
-                    <div className="flex flex-col gap-6">
-                        <Card className="bg-green-50 p-4 flex-1 shadow">
-                            <div className="font-bold text-green-700 mb-2">20% Off</div>
-                            <div className="text-lg font-semibold mb-1">Top Manga Tuần</div>
-                            <Button size="sm" color="success" variant="flat">Xem ngay</Button>
-                        </Card>
-                        <Card className="bg-yellow-50 p-4 flex-1 shadow">
-                            <div className="font-bold text-yellow-700 mb-2">15% Off</div>
-                            <div className="text-lg font-semibold mb-1">Top Movie Tuần</div>
-                            <Button size="sm" color="warning" variant="flat">Xem ngay</Button>
-                        </Card>
+                        
+                        {loading ? (
+                            <div className="space-y-4">
+                                <Skeleton className="h-12 w-3/4 rounded" />
+                                <Skeleton className="h-6 w-full rounded" />
+                                <Skeleton className="h-6 w-2/3 rounded" />
+                                <div className="flex gap-2">
+                                    <Skeleton className="h-10 w-32 rounded" />
+                                    <Skeleton className="h-10 w-24 rounded" />
+                                </div>
+                            </div>
+                        ) : (
+                            <>
+                                <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
+                                    {featuredContent[currentFeatured]?.title}
+                                </h1>
+                                
+                                <p className="text-xl text-gray-200 mb-6 leading-relaxed">
+                                    {featuredContent[currentFeatured]?.description}
+                                </p>
+
+                                <div className="flex items-center gap-4 mb-8">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-yellow-400 text-xl">⭐</span>
+                                        <span className="font-semibold">{featuredContent[currentFeatured]?.rating}</span>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        {featuredContent[currentFeatured]?.genre?.map((g, idx) => (
+                                            <Chip key={idx} size="sm" variant="bordered" className="text-white border-white/30">
+                                                {g}
+                                            </Chip>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="flex gap-4">
+                                    <Button 
+                                        size="lg" 
+                                        color="primary" 
+                                        className="bg-gradient-to-r from-blue-600 to-purple-600 hover:scale-105 transition-transform font-semibold"
+                                    >
+                                        {featuredContent[currentFeatured]?.type === 'Manga' ? '📖 Đọc Ngay' : '🎬 Xem Ngay'}
+                                    </Button>
+                                    <Button 
+                                        size="lg" 
+                                        variant="bordered" 
+                                        className="border-white text-white hover:bg-white/10"
+                                    >
+                                        📋 Chi Tiết
+                                    </Button>
+                                </div>
+                            </>
+                        )}
                     </div>
                 </div>
 
-                {/* Upcoming Section */}
-                <div>
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-xl font-bold">Sắp Ra Mắt</h2>
-                        <Button variant="light" size="sm">Xem tất cả →</Button>
-                    </div>
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                        {loading
-                            ? Array.from({ length: 5 }).map((_, i) => (
-                                <Card key={i} className="flex flex-col items-center py-4">
-                                    <Skeleton className="h-24 w-20 rounded mb-2" />
-                                    <Skeleton className="h-5 w-3/4 mb-1" />
-                                    <Skeleton className="h-4 w-1/2 mb-2" />
-                                    <Skeleton className="h-6 w-2/3" />
-                                </Card>
-                            ))
-                            : upcoming.map((item) => (
-                                <Card key={item.id} className="flex flex-col items-center py-4 hover:shadow-lg transition">
-                                    <img
-                                        src={item.image || "https://mangadex.org/img/cover-placeholder.png"}
-                                        alt={item.title}
-                                        className="h-24 w-20 object-cover rounded mb-2"
-                                    />
-                                    <span className="font-semibold">{item.title}</span>
-                                    <span className="text-xs text-gray-500">{item.type}</span>
-                                    <Badge color="warning" variant="flat" className="mt-2">Khởi chiếu: {item.date}</Badge>
-                                </Card>
-                            ))}
-                    </div>
+                {/* Hero Navigation Dots */}
+                <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-2">
+                    {featuredContent.map((_, idx) => (
+                        <button
+                            key={idx}
+                            onClick={() => setCurrentFeatured(idx)}
+                            className={`w-3 h-3 rounded-full transition-all ${
+                                idx === currentFeatured ? 'bg-white scale-125' : 'bg-white/50'
+                            }`}
+                        />
+                    ))}
+                </div>
+            </div>
+
+            {/* Main Content */}
+            <div className="container mx-auto px-6 space-y-16 py-16">
+                
+                {/* Categories Section */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    {categories.map((category, idx) => (
+                        <Card 
+                            key={idx} 
+                            className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-lg border border-white/20 hover:scale-105 transition-all cursor-pointer"
+                        >
+                            <CardBody className="text-center p-6">
+                                <div className="text-4xl mb-3">{category.icon}</div>
+                                <h3 className="text-white font-bold text-lg">{category.name}</h3>
+                                <p className="text-gray-300">{category.count} nội dung</p>
+                            </CardBody>
+                        </Card>
+                    ))}
                 </div>
 
-                {/* New Manga Updated - Horizontal Scroll */}
-                <div>
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-xl font-bold">Truyện mới cập nhật</h2>
-                        <Button variant="light" size="sm">Xem tất cả →</Button>
+                {/* New Updates */}
+                <section>
+                    <div className="flex justify-between items-center mb-8">
+                        <h2 className="text-3xl font-bold text-white flex items-center gap-3">
+                            🆕 Cập Nhật Mới Nhất
+                        </h2>
+                        <Button 
+                            variant="ghost" 
+                            className="text-gray-300 hover:text-white"
+                            endContent="→"
+                        >
+                            Xem tất cả
+                        </Button>
                     </div>
-                    <div className="flex gap-4 overflow-x-auto pb-2">
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {loading
                             ? Array.from({ length: 4 }).map((_, i) => (
-                                <Card key={i} className="min-w-[220px] w-56 flex flex-col items-center py-4">
-                                    <Skeleton className="h-6 w-3/4 mb-2" />
-                                    <Skeleton className="h-4 w-1/2 mb-2" />
-                                    <Skeleton className="h-8 w-2/3" />
-                                </Card>
-                            ))
-                            : newManga.map((manga) => (
-                                <Card key={manga.id} className="min-w-[220px] w-56 shadow hover:scale-105 transition-transform">
-                                    <CardHeader>
-                                        <div className="font-semibold text-lg">{manga.title}</div>
-                                    </CardHeader>
-                                    <Divider />
-                                    <CardBody>
-                                        <div className="flex items-center justify-between mb-2">
-                                            <Badge color="success" variant="flat">{manga.chapter}</Badge>
-                                            <span className="text-xs text-gray-500">{manga.updatedAt}</span>
+                                <Card key={i} className="bg-white/10 backdrop-blur">
+                                    <CardBody className="p-0">
+                                        <Skeleton className="h-64 w-full rounded-t-lg" />
+                                        <div className="p-4 space-y-2">
+                                            <Skeleton className="h-5 w-3/4" />
+                                            <Skeleton className="h-4 w-1/2" />
+                                            <Skeleton className="h-8 w-full" />
                                         </div>
-                                        <Button color="success" className="w-full">Đọc ngay</Button>
                                     </CardBody>
-                                </Card>
-                            ))}
-                    </div>
-                </div>
-
-                {/* Recommended Manga - Horizontal Scroll */}
-                <div>
-                    <div className="flex justify-between items-center mb-4">
-                        <h2 className="text-xl font-bold">Truyện được đề xuất</h2>
-                        <Button variant="light" size="sm">Xem tất cả →</Button>
-                    </div>
-                    <div className="flex gap-4 overflow-x-auto pb-2">
-                        {loading
-                            ? Array.from({ length: 3 }).map((_, i) => (
-                                <Card key={i} className="min-w-[220px] w-56 flex flex-col items-center py-4">
-                                    <Skeleton className="h-6 w-3/4 mb-2" />
-                                    <Skeleton className="h-4 w-1/2 mb-2" />
-                                    <Skeleton className="h-8 w-2/3" />
                                 </Card>
                             ))
-                            : recommendedManga.map((manga) => (
-                                <Card key={manga.id} className="min-w-[220px] w-56 hover:scale-105 transition-transform shadow-md">
-                                    <CardHeader>
-                                        <div className="font-semibold text-lg">{manga.title}</div>
-                                    </CardHeader>
-                                    <Divider />
-                                    <CardBody>
-                                        <Button color="primary" className="w-full">Đọc ngay</Button>
+                            : newUpdates.map((item) => (
+                                <Card key={item.id} className="bg-white/10 backdrop-blur-lg border border-white/20 hover:scale-105 transition-all group cursor-pointer">
+                                    <CardBody className="p-0">
+                                        <div className="relative overflow-hidden">
+                                            <Image
+                                                src={item.image}
+                                                alt={item.title}
+                                                className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
+                                            />
+                                            <div className="absolute top-3 right-3">
+                                                <Chip size="sm" color="success" variant="solid">
+                                                    {item.chapter}
+                                                </Chip>
+                                            </div>
+                                            <div className="absolute bottom-3 left-3">
+                                                <Chip size="sm" variant="solid" className="bg-black/50 text-white">
+                                                    ⭐ {item.rating}
+                                                </Chip>
+                                            </div>
+                                        </div>
+                                        <div className="p-4">
+                                            <h3 className="text-white font-bold text-lg mb-2 line-clamp-1">{item.title}</h3>
+                                            <p className="text-gray-400 text-sm mb-3">Cập nhật {item.updatedAt}</p>
+                                            <Button 
+                                                size="sm" 
+                                                color="primary" 
+                                                className="w-full bg-gradient-to-r from-blue-600 to-purple-600"
+                                            >
+                                                📖 Đọc Ngay
+                                            </Button>
+                                        </div>
                                     </CardBody>
                                 </Card>
                             ))}
                     </div>
-                </div>
+                </section>
 
-                {/* Top Manga & Movie Section */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <Card className="shadow-lg">
-                        <CardHeader>
-                            <h2 className="text-xl font-bold text-indigo-700">Top Manga Đọc Nhiều Nhất Tuần</h2>
+                {/* Top Rankings */}
+                <section className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* Top Manga */}
+                    <Card className="bg-gradient-to-br from-blue-900/50 to-blue-800/30 backdrop-blur-lg border border-blue-500/30">
+                        <CardHeader className="pb-4">
+                            <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                                🏆 Top Manga Tuần Này
+                            </h2>
                         </CardHeader>
-                        <Divider />
+                        <Divider className="bg-white/20" />
                         <CardBody>
-                            <div className="flex flex-col gap-3">
+                            <div className="space-y-4">
                                 {loading
-                                    ? Array.from({ length: 3 }).map((_, i) => (
-                                        <Card key={i} className="flex flex-row items-center justify-between px-4 py-2">
-                                            <div className="flex items-center gap-3">
-                                                <Skeleton className="h-6 w-6 rounded-full" />
-                                                <Skeleton className="h-4 w-24" />
+                                    ? Array.from({ length: 5 }).map((_, i) => (
+                                        <div key={i} className="flex items-center gap-4">
+                                            <Skeleton className="w-8 h-8 rounded-full" />
+                                            <Skeleton className="h-16 w-12 rounded" />
+                                            <div className="flex-1 space-y-2">
+                                                <Skeleton className="h-4 w-3/4" />
+                                                <Skeleton className="h-3 w-1/2" />
                                             </div>
-                                            <Skeleton className="h-4 w-16" />
-                                        </Card>
+                                        </div>
                                     ))
                                     : topManga.map((manga, idx) => (
-                                        <Card
-                                            key={manga.id}
-                                            className="flex flex-row items-center justify-between px-4 py-2 shadow-sm hover:shadow-md transition"
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <Badge color="primary" variant="flat">{idx + 1}</Badge>
-                                                <span className="font-medium">{manga.title}</span>
+                                        <div key={manga.id} className="flex items-center gap-4 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer">
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-white ${
+                                                idx === 0 ? 'bg-yellow-500' : idx === 1 ? 'bg-gray-400' : idx === 2 ? 'bg-orange-600' : 'bg-blue-600'
+                                            }`}>
+                                                {idx + 1}
                                             </div>
-                                            <span className="text-gray-500 text-sm">{manga.views} lượt xem</span>
-                                        </Card>
+                                            <Image src={manga.image} alt={manga.title} className="w-12 h-16 object-cover rounded" />
+                                            <div className="flex-1">
+                                                <h4 className="text-white font-semibold">{manga.title}</h4>
+                                                <div className="flex items-center gap-3 text-sm text-gray-400">
+                                                    <span>👁️ {manga.views.toLocaleString()}</span>
+                                                    <span>⭐ {manga.rating}</span>
+                                                </div>
+                                            </div>
+                                        </div>
                                     ))}
                             </div>
                         </CardBody>
                     </Card>
-                    <Card className="shadow-lg">
-                        <CardHeader>
-                            <h2 className="text-xl font-bold text-pink-700">Top Movie Xem Nhiều Nhất Tuần</h2>
+
+                    {/* Top Movies */}
+                    <Card className="bg-gradient-to-br from-purple-900/50 to-purple-800/30 backdrop-blur-lg border border-purple-500/30">
+                        <CardHeader className="pb-4">
+                            <h2 className="text-2xl font-bold text-white flex items-center gap-3">
+                                🎬 Top Movie Tuần Này
+                            </h2>
                         </CardHeader>
-                        <Divider />
+                        <Divider className="bg-white/20" />
                         <CardBody>
-                            <div className="flex flex-col gap-3">
+                            <div className="space-y-4">
                                 {loading
-                                    ? Array.from({ length: 3 }).map((_, i) => (
-                                        <Card key={i} className="flex flex-row items-center justify-between px-4 py-2">
-                                            <div className="flex items-center gap-3">
-                                                <Skeleton className="h-6 w-6 rounded-full" />
-                                                <Skeleton className="h-4 w-24" />
+                                    ? Array.from({ length: 5 }).map((_, i) => (
+                                        <div key={i} className="flex items-center gap-4">
+                                            <Skeleton className="w-8 h-8 rounded-full" />
+                                            <Skeleton className="h-16 w-12 rounded" />
+                                            <div className="flex-1 space-y-2">
+                                                <Skeleton className="h-4 w-3/4" />
+                                                <Skeleton className="h-3 w-1/2" />
                                             </div>
-                                            <Skeleton className="h-4 w-16" />
-                                        </Card>
+                                        </div>
                                     ))
                                     : topMovies.map((movie, idx) => (
-                                        <Card
-                                            key={movie.id}
-                                            className="flex flex-row items-center justify-between px-4 py-2 shadow-sm hover:shadow-md transition"
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <Badge color="secondary" variant="flat">{idx + 1}</Badge>
-                                                <span className="font-medium">{movie.title}</span>
+                                        <div key={movie.id} className="flex items-center gap-4 p-3 rounded-lg bg-white/5 hover:bg-white/10 transition-colors cursor-pointer">
+                                            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-white ${
+                                                idx === 0 ? 'bg-yellow-500' : idx === 1 ? 'bg-gray-400' : idx === 2 ? 'bg-orange-600' : 'bg-purple-600'
+                                            }`}>
+                                                {idx + 1}
                                             </div>
-                                            <span className="text-gray-500 text-sm">{movie.views} lượt xem</span>
-                                        </Card>
+                                            <Image src={movie.image} alt={movie.title} className="w-12 h-16 object-cover rounded" />
+                                            <div className="flex-1">
+                                                <h4 className="text-white font-semibold">{movie.title}</h4>
+                                                <div className="flex items-center gap-3 text-sm text-gray-400">
+                                                    <span>👁️ {movie.views.toLocaleString()}</span>
+                                                    <span>⭐ {movie.rating}</span>
+                                                </div>
+                                            </div>
+                                        </div>
                                     ))}
                             </div>
                         </CardBody>
                     </Card>
-                </div>
+                </section>
 
-                {/* Các Team Dịch - Logo style giống mẫu */}
-                <div className="bg-gray-50 rounded-lg py-8 px-4 flex justify-center items-center my-8">
-                    <div className="flex flex-row flex-wrap justify-center items-center gap-12 w-full">
+                {/* Upcoming Content */}
+                <section>
+                    <div className="flex justify-between items-center mb-8">
+                        <h2 className="text-3xl font-bold text-white flex items-center gap-3">
+                            🚀 Sắp Ra Mắt
+                        </h2>
+                        <Button 
+                            variant="ghost" 
+                            className="text-gray-300 hover:text-white"
+                            endContent="→"
+                        >
+                            Xem lịch phát hành
+                        </Button>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
                         {loading
-                            ? Array.from({ length: 4 }).map((_, i) => (
-                                <Skeleton key={i} className="h-12 w-28 rounded" />
+                            ? Array.from({ length: 5 }).map((_, i) => (
+                                <Card key={i} className="bg-white/10 backdrop-blur">
+                                    <CardBody className="p-0">
+                                        <Skeleton className="h-56 w-full rounded-t-lg" />
+                                        <div className="p-4 space-y-2">
+                                            <Skeleton className="h-5 w-3/4" />
+                                            <Skeleton className="h-4 w-1/2" />
+                                            <Skeleton className="h-6 w-full" />
+                                        </div>
+                                    </CardBody>
+                                </Card>
                             ))
-                            : teamLogos.map((team) => (
-                                <img
-                                    key={team.id}
-                                    src={team.logo}
-                                    alt={team.name}
-                                    className="h-12 object-contain grayscale opacity-60"
-                                    style={{ maxWidth: 120 }}
-                                />
+                            : upcomingContent.map((item) => (
+                                <Card key={item.id} className="bg-white/10 backdrop-blur-lg border border-white/20 hover:scale-105 transition-all group cursor-pointer">
+                                    <CardBody className="p-0">
+                                        <div className="relative overflow-hidden">
+                                            <Image
+                                                src={item.image}
+                                                alt={item.title}
+                                                className="w-full h-56 object-cover group-hover:scale-110 transition-transform duration-500"
+                                            />
+                                            <div className="absolute top-3 right-3">
+                                                <Chip 
+                                                    size="sm" 
+                                                    color={item.type === 'Manga' ? 'primary' : item.type === 'Movie' ? 'secondary' : 'success'}
+                                                    variant="solid"
+                                                >
+                                                    {item.type}
+                                                </Chip>
+                                            </div>
+                                        </div>
+                                        <div className="p-4">
+                                            <h3 className="text-white font-bold text-sm mb-2 line-clamp-2">{item.title}</h3>
+                                            <div className="flex gap-1 mb-2 flex-wrap">
+                                                {item.genre.map((g, idx) => (
+                                                    <Chip key={idx} size="sm" variant="bordered" className="text-xs text-gray-400 border-gray-600">
+                                                        {g}
+                                                    </Chip>
+                                                ))}
+                                            </div>
+                                            <Badge color="warning" variant="flat" className="text-xs">
+                                                📅 {item.date}
+                                            </Badge>
+                                        </div>
+                                    </CardBody>
+                                </Card>
                             ))}
                     </div>
-                </div>
+                </section>
 
-                {/* Best Team of the Month */}
-                <Card className="bg-gradient-to-r from-yellow-100 via-yellow-50 to-white/80 border-l-4 border-yellow-400 p-6 rounded-xl shadow-lg flex items-center gap-6">
-                    {loading
-                        ? (
-                            <Skeleton className="h-24 w-24 rounded-full" />
-                        ) : (
-                            <Avatar src={bestTeam.logo} alt={bestTeam.name} className="h-24 w-24 border-4 border-yellow-300 shadow" size="xl" />
-                        )
-                    }
-                    <div>
-                        <h2 className="text-2xl font-bold mb-2 text-yellow-700">Team Xuất Sắc Tháng Này</h2>
-                        {loading
-                            ? (
-                                <>
-                                    <Skeleton className="h-6 w-32 mb-2" />
-                                    <Skeleton className="h-4 w-48" />
-                                </>
-                            ) : (
-                                <>
-                                    <div className="font-semibold text-lg">{bestTeam.name}</div>
-                                    <div className="text-gray-700">{bestTeam.description}</div>
-                                </>
-                            )
-                        }
+                {/* Call to Action */}
+                <Card className="bg-gradient-to-r from-blue-900/30 via-purple-900/30 to-pink-900/30 backdrop-blur-lg border border-white/20 p-8">
+                    <div className="text-center">
+                        <h2 className="text-4xl font-bold text-white mb-4">
+                            Khám Phá Thế Giới Manga & Anime 🌟
+                        </h2>
+                        <p className="text-gray-300 text-lg mb-8 max-w-2xl mx-auto">
+                            Tham gia cộng đồng hơn 1 triệu người yêu thích manga và anime. 
+                            Trải nghiệm nội dung chất lượng cao, cập nhật nhanh nhất!
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                            <Button 
+                                size="lg" 
+                                color="primary" 
+                                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:scale-105 transition-transform font-semibold px-8"
+                            >
+                                🚀 Bắt Đầu Khám Phá
+                            </Button>
+                            <Button 
+                                size="lg" 
+                                variant="bordered" 
+                                className="border-white text-white hover:bg-white/10 px-8"
+                            >
+                                💎 Đăng Ký Premium
+                            </Button>
+                        </div>
                     </div>
                 </Card>
             </div>
-            {/* CSS for auto-scroll */}
-            <style jsx>{`
-                    @keyframes scroll-x {
-                        0% { transform: translateX(0); }
-                        100% { transform: translateX(-50%); }
-                    }
-                `}</style>
         </div>
     );
 }
