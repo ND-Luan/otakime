@@ -36,7 +36,7 @@ import {
 } from "./pages/client";
 
 
-const isMaintain = false
+const isMaintain = true
 const defaultTitle = 'Otakime - Home'
 const defaultDescription= 'Trang web chính thức của nhóm dịch Otakime, Việt hóa những dự án manga nhằm giới thiệu độc giả. Truy cập ngay để đọc những tựa truyện được yêu thích.'
 
