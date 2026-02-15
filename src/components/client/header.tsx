@@ -1,6 +1,258 @@
-import { Avatar, Dropdown, DropdownItem, DropdownMenu, DropdownTrigger, Input, Navbar, NavbarBrand, NavbarContent, NavbarItem } from '@heroui/react';
+'use client'
+
+import { 
+    Avatar, 
+    Dropdown, 
+    DropdownItem, 
+    DropdownMenu, 
+    DropdownTrigger, 
+    Input, 
+    Navbar, 
+    NavbarBrand, 
+    NavbarContent, 
+    NavbarItem,
+    NavbarMenu,
+    NavbarMenuItem,
+    NavbarMenuToggle
+} from '@heroui/react';
 import NextLink from "next/link";
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
+import { 
+    MagnifyingGlassIcon, 
+    BookOpenIcon,
+    FilmIcon,
+    UserGroupIcon,
+    NewspaperIcon,
+    InformationCircleIcon,
+    UserCircleIcon,
+    Cog6ToothIcon,
+    QuestionMarkCircleIcon,
+    ArrowRightOnRectangleIcon
+} from "@heroicons/react/24/outline";
+import { SparklesIcon } from "@heroicons/react/24/solid";
+
+// Logo Component with gradient
+export const Logo: React.FC = () => {
+    return (
+        <div className="flex items-center gap-2">
+            <div className="relative">
+                <SparklesIcon className="w-8 h-8 text-[#ADF709]" />
+                <div className="absolute inset-0 blur-lg opacity-50">
+                    <SparklesIcon className="w-8 h-8 text-[#00CCFF]" />
+                </div>
+            </div>
+            <span className="font-black text-xl bg-gradient-to-r from-[#ADF709] via-[#00CCFF] to-[#F3ADC3] bg-clip-text text-transparent">
+                MANGA
+            </span>
+        </div>
+    );
+};
+
+const Header: React.FC = () => {
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+    const menuItems = useMemo(() => {
+        return [
+            { label: "Home", href: "/", icon: SparklesIcon },
+            { label: "Manga", href: "/manga", icon: BookOpenIcon },
+            { label: "Movie", href: "/movie", icon: FilmIcon },
+            { label: "Team", href: "/team", icon: UserGroupIcon },
+            { label: "Blog", href: "/blog", icon: NewspaperIcon },
+            { label: "About", href: "/about", icon: InformationCircleIcon },
+        ];
+    }, []);
+
+    return (
+        <Navbar 
+            isBordered
+            isMenuOpen={isMenuOpen}
+            onMenuOpenChange={setIsMenuOpen}
+            classNames={{
+                base: "bg-gray-950/80 backdrop-blur-xl border-white/10",
+                wrapper: "px-4 sm:px-6",
+                item: [
+                    "flex",
+                    "relative",
+                    "h-full",
+                    "items-center",
+                    "data-[active=true]:after:content-['']",
+                    "data-[active=true]:after:absolute",
+                    "data-[active=true]:after:bottom-0",
+                    "data-[active=true]:after:left-0",
+                    "data-[active=true]:after:right-0",
+                    "data-[active=true]:after:h-[2px]",
+                    "data-[active=true]:after:rounded-[2px]",
+                    "data-[active=true]:after:bg-gradient-to-r",
+                    "data-[active=true]:after:from-[#ADF709]",
+                    "data-[active=true]:after:to-[#00CCFF]",
+                ],
+            }}
+        >
+            {/* Mobile Menu Toggle */}
+            <NavbarContent className="sm:hidden" justify="start">
+                <NavbarMenuToggle
+                    aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+                    className="text-white"
+                />
+            </NavbarContent>
+
+            {/* Logo - Center on mobile, left on desktop */}
+            <NavbarContent className="sm:hidden pr-3" justify="center">
+                <NavbarBrand>
+                    <Logo />
+                </NavbarBrand>
+            </NavbarContent>
+
+            {/* Desktop - Logo & Menu */}
+            <NavbarContent className="hidden sm:flex gap-4" justify="start">
+                <NavbarBrand className="mr-4">
+                    <Logo />
+                </NavbarBrand>
+                <NavbarContent className="flex gap-6">
+                    {menuItems.map((item, index) => {
+                        const Icon = item.icon;
+                        return (
+                            <NavbarItem key={index}>
+                                <NextLink 
+                                    href={item.href} 
+                                    className="flex items-center gap-2 text-sm font-semibold text-gray-400 hover:text-white transition-colors group"
+                                >
+                                    <Icon className="w-4 h-4 group-hover:text-[#00CCFF] transition-colors" />
+                                    <span>{item.label}</span>
+                                </NextLink>
+                            </NavbarItem>
+                        );
+                    })}
+                </NavbarContent>
+            </NavbarContent>
+
+            {/* Right Side - Search & Profile */}
+            <NavbarContent as="div" className="items-center" justify="end">
+                <Input
+                    classNames={{
+                        base: "max-w-full sm:max-w-[12rem] h-10",
+                        mainWrapper: "h-full",
+                        input: "text-small text-white placeholder:text-gray-500",
+                        inputWrapper: [
+                            "h-full",
+                            "font-normal",
+                            "bg-white/5",
+                            "backdrop-blur-md",
+                            "border",
+                            "border-white/10",
+                            "hover:border-[#00CCFF]/50",
+                            "focus-within:border-[#00CCFF]",
+                            "transition-colors",
+                            "group-data-[focus=true]:bg-white/10",
+                        ],
+                    }}
+                    placeholder="Tìm kiếm..."
+                    size="sm"
+                    startContent={
+                        <MagnifyingGlassIcon className="w-4 h-4 text-gray-500" />
+                    }
+                    type="search"
+                />
+                
+                <Dropdown placement="bottom-end">
+                    <DropdownTrigger>
+                        <Avatar
+                            isBordered
+                            as="button"
+                            className="transition-transform border-2 border-[#00CCFF]/50 hover:border-[#ADF709] hover:scale-110"
+                            color="primary"
+                            name="User"
+                            size="sm"
+                            src="https://i.pravatar.cc/150?u=a042581f4e29026704d"
+                        />
+                    </DropdownTrigger>
+                    <DropdownMenu 
+                        aria-label="Profile Actions" 
+                        variant="flat"
+                        classNames={{
+                            base: "bg-gray-900/95 backdrop-blur-xl border border-white/10",
+                            list: "gap-1",
+                        }}
+                    >
+                        <DropdownItem 
+                            key="profile"
+                            startContent={<UserCircleIcon className="w-5 h-5 text-[#00CCFF]" />}
+                            classNames={{
+                                base: "text-white hover:bg-white/10",
+                            }}
+                        >
+                            <NextLink href="/profile" className="w-full">
+                                Profile
+                            </NextLink>
+                        </DropdownItem>
+                        
+                        <DropdownItem 
+                            key="team_settings"
+                            startContent={<UserGroupIcon className="w-5 h-5 text-[#F3ADC3]" />}
+                            classNames={{
+                                base: "text-white hover:bg-white/10",
+                            }}
+                        >
+                            Team Settings
+                        </DropdownItem>
+                        
+                        <DropdownItem 
+                            key="configurations"
+                            startContent={<Cog6ToothIcon className="w-5 h-5 text-[#ADF709]" />}
+                            classNames={{
+                                base: "text-white hover:bg-white/10",
+                            }}
+                        >
+                            Configurations
+                        </DropdownItem>
+                        
+                        <DropdownItem 
+                            key="help_and_feedback"
+                            startContent={<QuestionMarkCircleIcon className="w-5 h-5 text-gray-400" />}
+                            classNames={{
+                                base: "text-white hover:bg-white/10",
+                            }}
+                        >
+                            Help & Feedback
+                        </DropdownItem>
+                        
+                        <DropdownItem 
+                            key="logout" 
+                            color="danger"
+                            startContent={<ArrowRightOnRectangleIcon className="w-5 h-5" />}
+                            classNames={{
+                                base: "text-red-400 hover:bg-red-500/10",
+                            }}
+                        >
+                            Log Out
+                        </DropdownItem>
+                    </DropdownMenu>
+                </Dropdown>
+            </NavbarContent>
+
+            {/* Mobile Menu */}
+            <NavbarMenu
+                className="bg-gray-950/95 backdrop-blur-xl border-r border-white/10 pt-6"
+            >
+                {menuItems.map((item, index) => {
+                    const Icon = item.icon;
+                    return (
+                        <NavbarMenuItem key={`${item.label}-${index}`}>
+                            <NextLink
+                                className="w-full flex items-center gap-3 py-3 px-4 rounded-lg text-white hover:bg-white/5 transition-colors group"
+                                href={item.href}
+                                onClick={() => setIsMenuOpen(false)}
+                            >
+                                <Icon className="w-5 h-5 text-gray-400 group-hover:text-[#00CCFF] transition-colors" />
+                                <span className="text-base font-semibold">{item.label}</span>
+                            </NextLink>
+                        </NavbarMenuItem>
+                    );
+                })}
+            </NavbarMenu>
+        </Navbar>
+    );
+};
 type SearchIconProps = {
     size?: number;
     strokeWidth?: number;
@@ -55,105 +307,6 @@ export const SearchIcon: React.FC<SearchIconProps> = ({
                 strokeWidth={strokeWidth}
             />
         </svg>
-    );
-};
-
-const Header: React.FC = () => {
-    const menuItems = useMemo(() => {
-        return [
-            { label: "Home", href: "/" },
-            { label: "Manga", href: "/manga" },
-            { label: "Movie", href: "/movie" },
-            { label: "Team", href: "/team" },
-            { label: "Blog", href: "/blog" },
-            { label: "About", href: "/about" },
-        ];
-    }, [])
-    return (
-        <Navbar isBordered
-            classNames={{
-                item: [
-                    "flex",
-                    "relative",
-                    "h-full",
-                    "items-center",
-                    "data-[active=true]:after:content-['']",
-                    "data-[active=true]:after:absolute",
-                    "data-[active=true]:after:bottom-0",
-                    "data-[active=true]:after:left-0",
-                    "data-[active=true]:after:right-0",
-                    "data-[active=true]:after:h-[2px]",
-                    "data-[active=true]:after:rounded-[2px]",
-                    "data-[active=true]:after:bg-primary",
-                ],
-            }}
-        >
-            <NavbarContent justify="start">
-                <NavbarBrand className="mr-4">
-                    <AcmeLogo />
-                    <p className="hidden sm:block font-bold text-inherit">ACME</p>
-                </NavbarBrand>
-                <NavbarContent className="hidden sm:flex gap-3">
-                    {
-                        menuItems.map((item, index) => (
-                            <NavbarItem key={index}>
-                                <NextLink href={item.href} passHref legacyBehavior>
-                                    <a className="text-small font-semibold text-default-500 hover:text-default-700 dark:text-default-400 dark:hover:text-default-200">
-                                        {item.label}
-                                    </a>
-                                </NextLink>
-                            </NavbarItem>
-                        ))
-                    }
-                </NavbarContent>
-            </NavbarContent>
-
-            <NavbarContent as="div" className="items-center" justify="end">
-                <Input
-                    classNames={{
-                        base: "max-w-full sm:max-w-[10rem] h-10",
-                        mainWrapper: "h-full",
-                        input: "text-small",
-                        inputWrapper:
-                            "h-full font-normal text-default-500 bg-default-400/20 dark:bg-default-500/20",
-                    }}
-                    placeholder="Type to search..."
-                    size="sm"
-                    startContent={<SearchIcon size={18} />}
-                    type="search"
-                />
-                <Dropdown placement="bottom-end">
-                    <DropdownTrigger>
-                        <Avatar
-                            isBordered
-                            as="button"
-                            className="transition-transform"
-                            color="secondary"
-                            name="Jason Hughes"
-                            size="sm"
-                            src="https://i.pravatar.cc/150?u=a042581f4e29026704d"
-                        />
-                    </DropdownTrigger>
-                    <DropdownMenu aria-label="Profile Actions" variant="flat">
-                        {/* <DropdownItem key="profile" className="h-14 gap-2">
-                            <p className="font-semibold">Signed in as</p>
-                            <p className="font-semibold">zoey@example.com</p>
-                        </DropdownItem> */}
-                        <DropdownItem key="profile" >
-                            <NextLink href={'/profile'} passHref legacyBehavior>
-                                Profile
-                            </NextLink>
-                        </DropdownItem>
-                        <DropdownItem key="team_settings">Team Settings</DropdownItem>
-                        <DropdownItem key="configurations">Configurations</DropdownItem>
-                        <DropdownItem key="help_and_feedback">Help & Feedback</DropdownItem>
-                        <DropdownItem key="logout" color="danger">
-                            Log Out
-                        </DropdownItem>
-                    </DropdownMenu>
-                </Dropdown>
-            </NavbarContent>
-        </Navbar >
     );
 };
 

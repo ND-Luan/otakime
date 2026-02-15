@@ -13,6 +13,7 @@
     "@ant-design/icons": "^5.6.1",
     "@ant-design/nextjs-registry": "^1.0.2",
     "@ant-design/v5-patch-for-react-19": "^1.0.3",
+    "@heroicons/react": "^2.2.0",
     "@heroui/avatar": "^2.2.15",
     "@heroui/badge": "^2.2.12",
     "@heroui/button": "^2.2.13",
