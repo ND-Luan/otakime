@@ -10,6 +10,7 @@ const nextConfig: NextConfig = {
       { source: "/category/:id", destination: "/client/category/:id" },
       { source: "/manga", destination: "/client/manga" },
       { source: "/manga/:id", destination: "/client/manga/:id" },
+      { source: "/manga/:id/:chapterId", destination: "/client/manga/:id/:chapterId" },
 
       { source: "/movie", destination: "/client/movie" },
       { source: "/movie/:id", destination: "/client/movie/:id" },
@@ -23,6 +24,8 @@ const nextConfig: NextConfig = {
       { source: "/about", destination: "/client/about" },
 
       { source: "/login", destination: "/auth/login" },
+      { source: "/register", destination: "/auth/register" },
+
     ];
   },
 };

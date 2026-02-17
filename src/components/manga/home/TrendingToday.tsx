@@ -1,15 +1,17 @@
 'use client'
 
+import { useRouter } from "next/navigation";
 import { Button } from "@heroui/button";
 import { Card, CardBody, Chip, Image } from "@heroui/react";
 import { ArrowRightIcon } from "@heroicons/react/24/outline";
 import { StarIcon, EyeIcon, FireIcon, BoltIcon, SparklesIcon, TrophyIcon } from "@heroicons/react/24/solid";
 
 const trendingToday = [
-    { 
-        id: 1, 
-        title: "Oshi no Ko", 
-        chapter: "Ch. 150", 
+    {
+        id: 1,
+        slug: "oshi-no-ko",
+        title: "Oshi no Ko",
+        chapter: "Ch. 150",
         views: "125K",
         image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=420&fit=crop",
         rating: 9.1,
@@ -17,10 +19,11 @@ const trendingToday = [
         badgeText: "HOT",
         badgeIcon: FireIcon
     },
-    { 
-        id: 2, 
-        title: "Kaiju No.8", 
-        chapter: "Ch. 110", 
+    {
+        id: 2,
+        slug: "kaiju-no-8",
+        title: "Kaiju No.8",
+        chapter: "Ch. 110",
         views: "98K",
         image: "https://images.unsplash.com/photo-1621952832039-6c4e99f75dd0?w=300&h=420&fit=crop",
         rating: 8.8,
@@ -28,10 +31,11 @@ const trendingToday = [
         badgeText: "TRENDING",
         badgeIcon: BoltIcon
     },
-    { 
-        id: 3, 
-        title: "Dandadan", 
-        chapter: "Ch. 99", 
+    {
+        id: 3,
+        slug: "dandadan",
+        title: "Dandadan",
+        chapter: "Ch. 99",
         views: "87K",
         image: "https://images.unsplash.com/photo-1613376023733-0a73315d9b06?w=300&h=420&fit=crop",
         rating: 8.9,
@@ -39,10 +43,11 @@ const trendingToday = [
         badgeText: "NEW",
         badgeIcon: SparklesIcon
     },
-    { 
-        id: 4, 
-        title: "Sakamoto Days", 
-        chapter: "Ch. 170", 
+    {
+        id: 4,
+        slug: "sakamoto-days",
+        title: "Sakamoto Days",
+        chapter: "Ch. 170",
         views: "76K",
         image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=420&fit=crop",
         rating: 8.7,
@@ -50,10 +55,11 @@ const trendingToday = [
         badgeText: "QUALITY",
         badgeIcon: StarIcon
     },
-    { 
-        id: 5, 
-        title: "Blue Lock", 
-        chapter: "Ch. 280", 
+    {
+        id: 5,
+        slug: "blue-lock",
+        title: "Blue Lock",
+        chapter: "Ch. 280",
         views: "112K",
         image: "https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=300&h=420&fit=crop",
         rating: 8.5,
@@ -61,10 +67,11 @@ const trendingToday = [
         badgeText: "HOT",
         badgeIcon: FireIcon
     },
-    { 
-        id: 6, 
-        title: "Chainsaw Man", 
-        chapter: "Ch. 160", 
+    {
+        id: 6,
+        slug: "chainsaw-man",
+        title: "Chainsaw Man",
+        chapter: "Ch. 160",
         views: "134K",
         image: "https://images.unsplash.com/photo-1626814026160-2237a95fc5a0?w=300&h=420&fit=crop",
         rating: 9.0,
@@ -75,6 +82,8 @@ const trendingToday = [
 ];
 
 export default function TrendingToday() {
+    const router = useRouter();
+
     return (
         <section>
             <div className="flex justify-between items-center mb-8">
@@ -85,10 +94,11 @@ export default function TrendingToday() {
                     </h2>
                     <p className="text-gray-400 text-lg">Những tác phẩm đang được yêu thích nhất</p>
                 </div>
-                <Button 
-                    variant="flat" 
+                <Button
+                    variant="flat"
                     className="bg-white/10 text-white hover:bg-white/20"
                     endContent={<ArrowRightIcon className="w-4 h-4" />}
+                    onClick={() => router.push("/manga")}
                 >
                     Xem Tất Cả
                 </Button>
@@ -98,31 +108,25 @@ export default function TrendingToday() {
                 {trendingToday.map((item) => {
                     const BadgeIcon = item.badgeIcon;
                     return (
-                        <Card 
+                        <Card
                             key={item.id}
-                            className="bg-gradient-to-b from-white/10 to-white/5 backdrop-blur-xl border border-white/20 hover:border-white/40 hover:scale-105 transition-all group"
+                            className="bg-gradient-to-b from-white/10 to-white/5 backdrop-blur-xl border border-white/20 hover:border-white/40 hover:scale-105 transition-all group cursor-pointer"
+                            onClick={() => router.push(`/manga/${item.slug}`)}
                         >
                             <CardBody className="p-0 relative">
-                                {/* Image - Clickable Area */}
-                                <div 
-                                    className="relative overflow-hidden rounded-t-lg cursor-pointer"
-                                    onClick={() => {
-                                        // Handle navigation to detail page
-                                        console.log('Navigate to:', item.title);
-                                    }}
-                                >
+                                {/* Image */}
+                                <div className="relative overflow-hidden rounded-t-lg">
                                     <Image
                                         src={item.image}
                                         alt={item.title}
                                         className="w-full h-72 object-cover group-hover:scale-110 transition-transform duration-500"
                                     />
-                                    {/* Overlay Gradient */}
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                                    
+
                                     {/* Badge */}
                                     <div className="absolute top-3 left-3">
-                                        <Chip 
-                                            size="sm" 
+                                        <Chip
+                                            size="sm"
                                             className="bg-[#F3ADC3] text-white font-bold"
                                             startContent={<BadgeIcon className="w-3 h-3" />}
                                         >
@@ -132,8 +136,8 @@ export default function TrendingToday() {
 
                                     {/* Rating */}
                                     <div className="absolute top-3 right-3">
-                                        <Chip 
-                                            size="sm" 
+                                        <Chip
+                                            size="sm"
                                             className="bg-black/60 text-white backdrop-blur"
                                             startContent={<StarIcon className="w-3 h-3 text-[#ADF709]" />}
                                         >
@@ -141,9 +145,9 @@ export default function TrendingToday() {
                                         </Chip>
                                     </div>
 
-                                    {/* Info at bottom */}
+                                    {/* Views & Trend */}
                                     <div className="absolute bottom-3 left-3 right-3">
-                                        <div className="flex items-center justify-between text-white text-xs mb-1">
+                                        <div className="flex items-center justify-between text-white text-xs">
                                             <span className="flex items-center gap-1">
                                                 <EyeIcon className="w-3 h-3" />
                                                 {item.views}
@@ -153,24 +157,18 @@ export default function TrendingToday() {
                                     </div>
                                 </div>
 
-                                {/* Content */}
+                                {/* Info */}
                                 <div className="p-3">
-                                    <h3 
-                                        className="text-white font-bold text-sm mb-1 line-clamp-1 cursor-pointer hover:text-[#00CCFF] transition-colors"
-                                        onClick={() => {
-                                            console.log('Navigate to:', item.title);
-                                        }}
-                                    >
+                                    <h3 className="text-white font-bold text-sm mb-1 line-clamp-1 hover:text-[#00CCFF] transition-colors">
                                         {item.title}
                                     </h3>
                                     <p className="text-gray-400 text-xs mb-2">{item.chapter}</p>
-                                    <Button 
-                                        size="sm" 
-                                        color="primary"
-                                        className="w-full bg-gradient-to-r from-[#00CCFF] to-[#ADF709] font-semibold"
+                                    <Button
+                                        size="sm"
+                                        className="w-full bg-gradient-to-r from-[#00CCFF] to-[#ADF709] text-white font-semibold"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            console.log('Read now:', item.title);
+                                            router.push(`/manga/${item.slug}`);
                                         }}
                                     >
                                         Đọc Ngay

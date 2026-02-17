@@ -6,9 +6,11 @@ import '../styles/client.css'; // CSS của Tailwind (client)
 import AdminLayout from '@/components/admin/admin_layout';
 import ClientLayout from '@/components/client/client_layout';
 
+
 import { AppProps } from 'next/app';
 
 export default function MyApp({ Component, pageProps, router }: AppProps) {
+
   // Kiểm tra nếu là trang admin
   if (router.pathname.startsWith('/admin')) {
     return (
@@ -23,7 +25,14 @@ export default function MyApp({ Component, pageProps, router }: AppProps) {
       <Component {...pageProps} />
     );
   }
-  // console.log('router.pathname', router.pathname);
+
+  if (router.pathname.startsWith('/auth/register')) {
+    console.log('Đang ở trang login');
+    return (
+      <Component {...pageProps} />
+    );
+  }
+
   // Mặc định là client
   return (
     <ClientLayout>

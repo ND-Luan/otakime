@@ -1,86 +1,69 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
   provider = "sqlserver"
-  url      = env("DATABASE_URL")
-  // shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 model Role {
-  RoleId Int    @id @default(autoincrement())
-  name   String @unique
-  users  User[]
-
+  RoleId        Int      @id @default(autoincrement())
+  name          String   @unique
   createdAt     DateTime @default(now())
   createdUserId Int?
   updatedAt     DateTime @default(now())
   updatedUserId Int?
+  users         User[]
 }
 
 model User {
-  UserId   Int    @id @default(autoincrement())
-  username String @unique
-  email    String @unique
-  password String @db.VarChar(Max)
-
-  createdAt     DateTime @default(now())
+  UserId        Int          @id @default(autoincrement())
+  username      String       @unique
+  email         String       @unique
+  password      String       @db.VarChar(Max)
+  createdAt     DateTime     @default(now())
   createdUserId Int?
-  updatedAt     DateTime @default(now())
+  updatedAt     DateTime     @default(now())
   updatedUserId Int?
-
-  RoleId    Int?
-  role      Role?      @relation(fields: [RoleId], references: [RoleId])
-  favorites Favorite[]
-
-  TeamDetail TeamDetail[]
+  RoleId        Int?
+  favorites     Favorite[]
+  TeamDetail    TeamDetail[]
+  role          Role?        @relation(fields: [RoleId], references: [RoleId])
 }
 
 model Team {
-  TeamId Int    @id @default(autoincrement())
-  name   String @unique
-
-  createdAt     DateTime @default(now())
+  TeamId        Int          @id @default(autoincrement())
+  name          String       @unique
+  createdAt     DateTime     @default(now())
   createdUserId Int?
-  updatedAt     DateTime @default(now())
+  updatedAt     DateTime     @default(now())
   updatedUserId Int?
-
-  TeamDetail TeamDetail[]
+  TeamDetail    TeamDetail[]
 }
 
 model TeamDetail {
-  TeamDetailId Int @id @default(autoincrement())
-  TeamId       Int
-  UserId       Int
-
+  TeamDetailId  Int      @id @default(autoincrement())
+  TeamId        Int
+  UserId        Int
   createdAt     DateTime @default(now())
   createdUserId Int?
   updatedAt     DateTime @default(now())
   updatedUserId Int?
-
-  team Team @relation(fields: [TeamId], references: [TeamId])
-  user User @relation(fields: [UserId], references: [UserId])
+  team          Team     @relation(fields: [TeamId], references: [TeamId])
+  user          User     @relation(fields: [UserId], references: [UserId])
 }
 
 model Movie {
-  MovieId     Int      @id @default(autoincrement())
+  MovieId     Int          @id @default(autoincrement())
   title       String
   description String?
   releaseDate DateTime
   posterUrl   String?
   movieType   String
-  createdAt   DateTime @default(now())
-
-  episodes  Episode[]
-  genres    MovieGenre[]
-  favorites Favorite[]
+  createdAt   DateTime     @default(now())
+  episodes    Episode[]
+  favorites   Favorite[]
+  genres      MovieGenre[]
 }
 
 model Episode {
@@ -90,47 +73,42 @@ model Episode {
   videoUrl  String
   MovieId   Int
   createdAt DateTime @default(now())
-
-  movie Movie @relation(fields: [MovieId], references: [MovieId])
+  movie     Movie    @relation(fields: [MovieId], references: [MovieId])
 }
 
 model Genre {
-  GenreId Int    @id @default(autoincrement())
-  name    String @unique
-
-  movies MovieGenre[]
-  mangas MangaGenre[]
+  GenreId Int          @id @default(autoincrement())
+  name    String       @unique
+  mangas  MangaGenre[]
+  movies  MovieGenre[]
 }
 
 model MovieGenre {
   MovieId Int
   GenreId Int
-
-  movie Movie @relation(fields: [MovieId], references: [MovieId])
-  genre Genre @relation(fields: [GenreId], references: [GenreId])
+  genre   Genre @relation(fields: [GenreId], references: [GenreId])
+  movie   Movie @relation(fields: [MovieId], references: [MovieId])
 
   @@id([MovieId, GenreId])
 }
 
 model Manga {
-  MangaId     Int      @id @default(autoincrement())
+  MangaId     Int          @id @default(autoincrement())
   title       String
   author      String?
   description String?
   coverUrl    String?
-  createdAt   DateTime @default(now())
-
-  chapters  Chapter[]
-  genres    MangaGenre[]
-  favorites Favorite[]
+  createdAt   DateTime     @default(now())
+  chapters    Chapter[]
+  favorites   Favorite[]
+  genres      MangaGenre[]
 }
 
 model MangaGenre {
   MangaId Int
   GenreId Int
-
-  manga Manga @relation(fields: [MangaId], references: [MangaId])
-  genre Genre @relation(fields: [GenreId], references: [GenreId])
+  genre   Genre @relation(fields: [GenreId], references: [GenreId])
+  manga   Manga @relation(fields: [MangaId], references: [MangaId])
 
   @@id([MangaId, GenreId])
 }
@@ -141,9 +119,8 @@ model Chapter {
   number    Int
   MangaId   Int
   createdAt DateTime @default(now())
-
-  manga  Manga   @relation(fields: [MangaId], references: [MangaId])
-  images Image[]
+  manga     Manga    @relation(fields: [MangaId], references: [MangaId])
+  images    Image[]
 }
 
 model Image {
@@ -152,8 +129,7 @@ model Image {
   imageUrl   String
   pageNumber Int
   createdAt  DateTime @default(now())
-
-  chapter Chapter @relation(fields: [ChapterId], references: [ChapterId])
+  chapter    Chapter  @relation(fields: [ChapterId], references: [ChapterId])
 }
 
 model Favorite {
@@ -162,8 +138,7 @@ model Favorite {
   MovieId    Int?
   MangaId    Int?
   createdAt  DateTime @default(now())
-
-  user  User   @relation(fields: [UserId], references: [UserId])
-  movie Movie? @relation(fields: [MovieId], references: [MovieId])
-  manga Manga? @relation(fields: [MangaId], references: [MangaId])
+  manga      Manga?   @relation(fields: [MangaId], references: [MangaId])
+  movie      Movie?   @relation(fields: [MovieId], references: [MovieId])
+  user       User     @relation(fields: [UserId], references: [UserId])
 }

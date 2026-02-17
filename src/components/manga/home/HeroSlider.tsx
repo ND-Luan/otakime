@@ -1,21 +1,23 @@
 'use client'
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@heroui/button";
 import { Chip } from "@heroui/react";
-import { 
-    PlayIcon, 
-    InformationCircleIcon, 
-    HeartIcon, 
-    FireIcon, 
+import {
+    PlayIcon,
+    InformationCircleIcon,
+    HeartIcon,
+    FireIcon,
     StarIcon as StarIconSolid,
     BookOpenIcon,
-    SparklesIcon 
+    SparklesIcon
 } from "@heroicons/react/24/solid";
 
 const heroSlides = [
     {
         id: 1,
+        slug: "one-piece",
         title: "One Piece",
         subtitle: "Hành trình huyền thoại vươn tới đỉnh cao",
         description: "Theo chân Luffy và băng Mũ Rơm trong cuộc phiêu lưu vĩ đại nhất, khám phá những bí ẩn của thế giới One Piece",
@@ -30,6 +32,7 @@ const heroSlides = [
     },
     {
         id: 2,
+        slug: "jujutsu-kaisen",
         title: "Jujutsu Kaisen",
         subtitle: "Cuộc chiến chống lại lời nguyền",
         description: "Yuji Itadori bước vào thế giới phù thủy đầy nguy hiểm để cứu nhân loại khỏi những lời nguyền đáng sợ",
@@ -44,6 +47,7 @@ const heroSlides = [
     },
     {
         id: 3,
+        slug: "your-name",
         title: "Your Name",
         subtitle: "Khi số phận gắn kết hai linh hồn",
         description: "Một câu chuyện tình yêu vượt thời gian giữa Mitsuha và Taki, đầy cảm động và kỳ diệu",
@@ -59,6 +63,7 @@ const heroSlides = [
 ];
 
 export default function HeroSlider() {
+    const router = useRouter();
     const [currentSlide, setCurrentSlide] = useState(0);
 
     useEffect(() => {
@@ -68,70 +73,70 @@ export default function HeroSlider() {
         return () => clearInterval(interval);
     }, []);
 
-    const currentHero = heroSlides[currentSlide];
-    const BadgeIcon = currentHero.badgeIcon;
+    const slide = heroSlides[currentSlide];
+    const BadgeIcon = slide.badgeIcon;
 
     return (
         <section className="relative h-[90vh] overflow-hidden">
-            {/* Background Image with Parallax Effect */}
+            {/* Background */}
             <div className="absolute inset-0">
-                <div 
-                    className="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out transform scale-105"
-                    style={{ backgroundImage: `url(${currentHero.image})` }}
+                <div
+                    className="absolute inset-0 bg-cover bg-center transition-all duration-1000 ease-in-out scale-105"
+                    style={{ backgroundImage: `url(${slide.image})` }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-black via-black/70 to-transparent" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent" />
             </div>
 
-            {/* Hero Content */}
+            {/* Content */}
             <div className="relative z-10 container mx-auto px-6 h-full flex items-center">
                 <div className="max-w-3xl space-y-6">
                     {/* Badge */}
                     <div className="flex items-center gap-3">
-                        <Chip 
+                        <Chip
                             size="lg"
-                            className={`bg-gradient-to-r ${currentHero.color} text-white font-bold px-4`}
+                            className={`bg-gradient-to-r ${slide.color} text-white font-bold px-4`}
                             startContent={<BadgeIcon className="w-4 h-4" />}
                         >
-                            {currentHero.badgeText}
+                            {slide.badgeText}
                         </Chip>
                         <Chip variant="flat" size="sm" className="bg-white/10 text-white backdrop-blur">
-                            {currentHero.status}
+                            {slide.status}
                         </Chip>
                     </div>
 
-                    {/* Title & Subtitle */}
+                    {/* Title */}
                     <div>
-                        <h1 className="text-6xl md:text-7xl font-black text-white mb-3 leading-tight tracking-tight">
-                            {currentHero.title}
+                        <h1
+                            className="text-6xl md:text-7xl font-black text-white mb-3 leading-tight tracking-tight cursor-pointer hover:opacity-80 transition-opacity"
+                            onClick={() => router.push(`/manga/${slide.slug}`)}
+                        >
+                            {slide.title}
                         </h1>
-                        <p className="text-2xl text-[#00CCFF] font-semibold">
-                            {currentHero.subtitle}
-                        </p>
+                        <p className="text-2xl text-[#00CCFF] font-semibold">{slide.subtitle}</p>
                     </div>
 
                     {/* Description */}
-                    <p className="text-xl text-gray-300 leading-relaxed max-w-2xl">
-                        {currentHero.description}
-                    </p>
+                    <p className="text-xl text-gray-300 leading-relaxed max-w-2xl">{slide.description}</p>
 
-                    {/* Stats Bar */}
+                    {/* Stats */}
                     <div className="flex items-center gap-6 py-4">
                         <div className="flex items-center gap-2 bg-[#ADF709]/20 px-4 py-2 rounded-full backdrop-blur border border-[#ADF709]/30">
                             <StarIconSolid className="w-5 h-5 text-[#ADF709]" />
-                            <span className="text-white font-bold text-lg">{currentHero.rating}</span>
+                            <span className="text-white font-bold text-lg">{slide.rating}</span>
                         </div>
                         <div className="flex items-center gap-2 bg-[#00CCFF]/20 px-4 py-2 rounded-full backdrop-blur border border-[#00CCFF]/30">
                             <BookOpenIcon className="w-5 h-5 text-[#00CCFF]" />
-                            <span className="text-white font-semibold">{currentHero.chapters}</span>
+                            <span className="text-white font-semibold">{slide.chapters}</span>
                         </div>
                         <div className="flex gap-2">
-                            {currentHero.tags.map((tag, idx) => (
-                                <Chip 
-                                    key={idx} 
-                                    size="sm" 
+                            {slide.tags.map((tag, idx) => (
+                                <Chip
+                                    key={idx}
+                                    size="sm"
                                     variant="flat"
-                                    className="bg-white/10 text-white backdrop-blur"
+                                    className="bg-white/10 text-white backdrop-blur cursor-pointer hover:bg-white/20"
+                                    onClick={() => router.push(`/category?tag=${encodeURIComponent(tag)}`)}
                                 >
                                     {tag}
                                 </Chip>
@@ -139,28 +144,31 @@ export default function HeroSlider() {
                         </div>
                     </div>
 
-                    {/* Action Buttons */}
+                    {/* Buttons */}
                     <div className="flex gap-4 pt-4">
-                        <Button 
+                        <Button
                             size="lg"
-                            className={`bg-gradient-to-r ${currentHero.color} text-white font-bold px-8 shadow-2xl hover:scale-105 transition-transform`}
+                            className={`bg-gradient-to-r ${slide.color} text-white font-bold px-8 shadow-2xl hover:scale-105 transition-transform`}
                             startContent={<PlayIcon className="w-5 h-5" />}
+                            onClick={() => router.push(`/manga/${slide.slug}`)}
                         >
                             Đọc Ngay
                         </Button>
-                        <Button 
+                        <Button
                             size="lg"
                             variant="bordered"
                             className="border-2 border-white text-white font-semibold px-8 hover:bg-white/10 backdrop-blur"
                             startContent={<InformationCircleIcon className="w-5 h-5" />}
+                            onClick={() => router.push(`/manga/${slide.slug}`)}
                         >
                             Thông Tin
                         </Button>
-                        <Button 
+                        <Button
                             size="lg"
                             variant="flat"
                             className="bg-white/10 text-white font-semibold backdrop-blur hover:bg-white/20"
                             startContent={<HeartIcon className="w-5 h-5" />}
+                            onClick={() => router.push("/register")}
                         >
                             Yêu Thích
                         </Button>
@@ -169,15 +177,15 @@ export default function HeroSlider() {
             </div>
 
             {/* Slide Indicators */}
-            <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2 flex gap-3 z-20">
+            <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex gap-3 z-20">
                 {heroSlides.map((_, idx) => (
                     <div
                         key={idx}
                         onClick={() => setCurrentSlide(idx)}
                         className={`cursor-pointer transition-all rounded-full ${
-                            idx === currentSlide 
-                                ? 'w-12 h-3 bg-white' 
-                                : 'w-3 h-3 bg-white/40 hover:bg-white/60'
+                            idx === currentSlide
+                                ? "w-12 h-3 bg-white"
+                                : "w-3 h-3 bg-white/40 hover:bg-white/60"
                         }`}
                     />
                 ))}

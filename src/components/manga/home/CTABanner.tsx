@@ -1,18 +1,24 @@
 'use client'
 
+import { useRouter } from "next/navigation";
 import { Button } from "@heroui/button";
 import { Card, CardBody } from "@heroui/react";
 import { RocketLaunchIcon, SparklesIcon, UserGroupIcon, BookOpenIcon, ClockIcon } from "@heroicons/react/24/solid";
 
 export default function CTABanner() {
+    const router = useRouter();
+
     return (
         <section>
             <Card className="bg-gradient-to-r from-[#00CCFF] via-[#F3ADC3] to-[#ADF709] border-none overflow-hidden relative">
-                {/* Animated Background Pattern */}
-                <div className="absolute inset-0 opacity-10">
-                    <div className="absolute inset-0" style={{
-                        backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,255,255,.1) 35px, rgba(255,255,255,.1) 70px)`
-                    }} />
+                {/* Background Pattern */}
+                <div className="absolute inset-0 opacity-10 pointer-events-none">
+                    <div
+                        className="absolute inset-0"
+                        style={{
+                            backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(255,255,255,.1) 35px, rgba(255,255,255,.1) 70px)`
+                        }}
+                    />
                 </div>
 
                 <CardBody className="relative z-10 py-16 px-8 text-center">
@@ -24,10 +30,10 @@ export default function CTABanner() {
                             <SparklesIcon className="w-12 h-12 text-[#ADF709] animate-pulse" />
                         </div>
                         <p className="text-xl text-white/90 mb-8 leading-relaxed">
-                            Hơn <span className="font-bold text-[#ADF709]">1 triệu người đọc</span> đã tin tưởng. 
+                            Hơn <span className="font-bold text-[#ADF709]">1 triệu người đọc</span> đã tin tưởng.
                             Khám phá hàng ngàn tác phẩm manga, anime, và light novel được cập nhật mỗi ngày!
                         </p>
-                        
+
                         {/* Stats */}
                         <div className="grid grid-cols-3 gap-6 mb-10 max-w-2xl mx-auto">
                             <div className="bg-white/10 backdrop-blur rounded-2xl p-4">
@@ -48,18 +54,20 @@ export default function CTABanner() {
                         </div>
 
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <Button 
+                            <Button
                                 size="lg"
                                 className="bg-white text-[#00CCFF] font-black px-10 text-lg hover:scale-105 transition-transform shadow-2xl"
                                 startContent={<RocketLaunchIcon className="w-5 h-5" />}
+                                onClick={() => router.push("/manga")}
                             >
                                 Khám Phá Ngay
                             </Button>
-                            <Button 
+                            <Button
                                 size="lg"
                                 variant="bordered"
                                 className="border-2 border-white text-white font-bold px-10 text-lg hover:bg-white/10 backdrop-blur"
                                 startContent={<SparklesIcon className="w-5 h-5" />}
+                                onClick={() => router.push("/register")}
                             >
                                 Premium
                             </Button>

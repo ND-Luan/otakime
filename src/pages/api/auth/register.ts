@@ -1,9 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { PrismaClient, User } from "@prisma/client";
+import { User } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { IApiResponse } from "@/types/response";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma"; // Import from the global instance
 
 export default async function handler(
   req: NextApiRequest,
@@ -68,6 +67,7 @@ export default async function handler(
     response.Data = user;
     return res.status(201).json(response);
   } catch (error) {
+    console.error('Register error:', error);
     response.Message = "Server error";
     return res.status(500).json(response);
   }
