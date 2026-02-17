@@ -1,116 +1,165 @@
+import type { NextApiRequest, NextApiResponse } from "next";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import cookie from "cookie";
+import { prisma } from "@/lib/prisma";
 import {
   ACCESS_TOKEN_EXPIRE,
-  REFRESH_TOKEN_COOKIE_MAX_AGE
+  ACCESS_TOKEN_COOKIE_MAX_AGE,
+  REFRESH_TOKEN_EXPIRE,
+  REFRESH_TOKEN_COOKIE_MAX_AGE,
 } from "@/lib/auth_config";
-import { prisma } from "@/lib/prisma";
-import { IApiResponse } from "@/types/response";
-import bcrypt from "bcryptjs";
-import cookie from "cookie";
-import crypto from "crypto";
-import jwt from "jsonwebtoken";
-import type { NextApiRequest, NextApiResponse } from "next";
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const response: IApiResponse<any> = {
-    IsSuccess: false,
-    Message: "",
-    Data: null,
-  };
-
   if (req.method !== "POST") {
-    response.Message = "Method not allowed";
-    return res.status(405).json(response);
+    return res.status(405).json({
+      IsSuccess: false,
+      Message: "Method not allowed",
+    });
   }
 
-  const { email, password } = req.body;
+  const { email, password, system } = req.body; // admin | client
 
-  if (!email || !password) {
-    response.Message = "Email and password are required";
-    return res.status(400).json(response);
+  if (!email || !password || !system) {
+    return res.status(400).json({
+      IsSuccess: false,
+      Message: "Missing required fields",
+    });
   }
 
   try {
     const user = await prisma.user.findUnique({
       where: { email },
       include: {
-        role: true,
+        roles: {
+          include: { role: true },
+        },
       },
     });
 
     if (!user) {
-      response.Message = "Invalid email or password";
-      return res.status(401).json(response);
+      return res.status(401).json({
+        IsSuccess: false,
+        Message: "Invalid email or password",
+      });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      response.Message = "Invalid email or password";
-      return res.status(401).json(response);
+      return res.status(401).json({
+        IsSuccess: false,
+        Message: "Invalid email or password",
+      });
     }
 
-    if (!process.env.JWT_SECRET_CLIENT) {
-      throw new Error("JWT_SECRET_CLIENT is not defined");
+    const roleNames = user.roles.map((r) => r.role.name);
+
+    if (system === "admin" && roleNames.length === 0) {
+      return res.status(403).json({
+        IsSuccess: false,
+        Message: "You are not allowed to access admin system",
+      });
     }
 
-    // 🔐 Access token
+    const accessSecret =
+      system === "admin"
+        ? process.env.JWT_SECRET_ADMIN
+        : process.env.JWT_SECRET_CLIENT;
+
+    const refreshSecret =
+      system === "admin"
+        ? process.env.JWT_REFRESH_SECRET_ADMIN
+        : process.env.JWT_REFRESH_SECRET_CLIENT;
+
+    if (!accessSecret || !refreshSecret) {
+      throw new Error("JWT secret not configured");
+    }
+
+    // 🔐 ACCESS TOKEN
     const accessToken = jwt.sign(
       {
         UserId: user.UserId,
         email: user.email,
         username: user.username,
-        RoleId: user.RoleId,
+        roles: roleNames,
+        system,
       },
-      process.env.JWT_SECRET_CLIENT,
+      accessSecret,
       { expiresIn: ACCESS_TOKEN_EXPIRE }
     );
 
-    // 🔁 Refresh token
-    const refreshToken = crypto.randomBytes(40).toString("hex");
-
-    const refreshExpire = new Date(
-      Date.now() + REFRESH_TOKEN_COOKIE_MAX_AGE * 1000
+    // 🔁 REFRESH TOKEN (JWT)
+    const refreshToken = jwt.sign(
+      {
+        UserId: user.UserId,
+        system,
+      },
+      refreshSecret,
+      { expiresIn: REFRESH_TOKEN_EXPIRE }
     );
 
+    const decodedRefresh: any = jwt.decode(refreshToken);
+
+    // Xóa refresh cũ (1 device = 1 token)
+    await prisma.refreshToken.deleteMany({
+      where: { UserId: user.UserId },
+    });
+
+    // Lưu refresh mới
     await prisma.refreshToken.create({
       data: {
         token: refreshToken,
         UserId: user.UserId,
-        expiresAt: refreshExpire,
+        expiresAt: new Date(decodedRefresh.exp * 1000),
       },
     });
 
-    // 🍪 Set cookies
+    // Cookie name
+    const tokenCookie =
+      system === "admin" ? "token_admin" : "token_client";
+
+    const refreshCookie =
+      system === "admin" ? "refresh_admin" : "refresh_client";
+
     res.setHeader("Set-Cookie", [
-      cookie.serialize("token", accessToken, {
+      cookie.serialize(tokenCookie, accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         path: "/",
-        maxAge: 60 * 15,
+        maxAge: ACCESS_TOKEN_COOKIE_MAX_AGE,
       }),
-      cookie.serialize("refreshToken", refreshToken, {
+      cookie.serialize(refreshCookie, refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
         sameSite: "lax",
         path: "/",
-        maxAge: 60 * 60 * 24 * 7,
+        maxAge: REFRESH_TOKEN_COOKIE_MAX_AGE,
       }),
     ]);
 
-    // ❌ Loại bỏ password
-    const { password: _, ...safeUser } = user;
+    // Chuẩn hóa user trả về (loại password)
+    const safeUser = {
+      UserId: user.UserId,
+      email: user.email,
+      username: user.username,
+      roles: roleNames,
+    };
 
-    response.IsSuccess = true;
-    response.Message = "Login successful";
-    response.Data = safeUser;
-
-    return res.status(200).json(response);
+    return res.status(200).json({
+      IsSuccess: true,
+      Message: "Login successful",
+      Data: safeUser
+    });
   } catch (error) {
     console.error(error);
-    response.Message = "Internal server error";
-    return res.status(500).json(response);
+    return res.status(500).json({
+      IsSuccess: false,
+      Message: "Internal server error",
+    });
   }
 }

@@ -1,14 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { User } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { IApiResponse } from "@/types/response";
-import { prisma } from "@/lib/prisma"; // Import from the global instance
+import { prisma } from "@/lib/prisma";
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  let response: IApiResponse<User> = {
+  const response: IApiResponse<any> = {
     IsSuccess: false,
     Message: "",
     Data: null,
@@ -27,7 +26,7 @@ export default async function handler(
   }
 
   try {
-    // Kiểm tra email hoặc username đã tồn tại chưa
+    // 🔎 Check tồn tại
     const existingUser = await prisma.user.findFirst({
       where: {
         OR: [{ email }, { username }],
@@ -39,35 +38,51 @@ export default async function handler(
       return res.status(409).json(response);
     }
 
-    // Hash password
+    // 🔐 Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Tạo user mới
-    const user = await prisma.user.create({
-      data: {
-        username,
-        email,
-        password: hashedPassword,
-      },
-      select: {
-        UserId: true,
-        username: true,
-        email: true,
-        password: true,
-        createdAt: true,
-        createdUserId: true,
-        updatedAt: true,
-        updatedUserId: true,
-        RoleId: true,
-      },
+    // 🔎 Lấy role mặc định
+    const defaultRole = await prisma.role.findUnique({
+      where: { name: "User" }, // 👈 phải tồn tại sẵn trong DB
+    });
+
+    if (!defaultRole) {
+      response.Message = "Default role not found";
+      return res.status(500).json(response);
+    }
+
+    // 🧱 Tạo user + gán role trong transaction
+    const newUser = await prisma.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: {
+          username,
+          email,
+          password: hashedPassword,
+        },
+      });
+
+      await tx.userRole.create({
+        data: {
+          UserId: user.UserId,
+          RoleId: defaultRole.RoleId,
+        },
+      });
+
+      return user;
     });
 
     response.IsSuccess = true;
     response.Message = "Register successful";
-    response.Data = user;
+    response.Data = {
+      UserId: newUser.UserId,
+      username: newUser.username,
+      email: newUser.email,
+      createdAt: newUser.createdAt,
+    };
+
     return res.status(201).json(response);
   } catch (error) {
-    console.error('Register error:', error);
+    console.error("Register error:", error);
     response.Message = "Server error";
     return res.status(500).json(response);
   }
