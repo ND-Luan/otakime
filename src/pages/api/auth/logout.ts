@@ -1,32 +1,51 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import { IApiResponse } from "@/types/response";
 import cookie from "cookie";
+import { prisma } from "@/lib/prisma";
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  let response: IApiResponse<null> = {
-    IsSuccess: false,
-    Message: "",
-    Data: null,
-  };
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  try {
+    const cookies = cookie.parse(req.headers.cookie || "");
+    const refreshToken = cookies.refreshToken;
 
-  if (req.method !== "POST") {
-    response.Message = "Method not allowed";
-    return res.status(405).json(response);
+    // 1️⃣ Xóa refresh token trong DB
+    if (refreshToken) {
+      await prisma.refreshToken.deleteMany({
+        where: {
+          token: refreshToken,
+        },
+      });
+    }
+
+    // 2️⃣ Xóa cookie phía client
+    res.setHeader("Set-Cookie", [
+      cookie.serialize("token", "", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: -1, // xoá cookie
+      }),
+      cookie.serialize("refreshToken", "", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: -1,
+      }),
+    ]);
+
+    return res.status(200).json({
+      IsSuccess: true,
+      Message: "Logged out successfully",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      IsSuccess: false,
+      Message: "Internal server error",
+    });
   }
-
-  // Xóa cookie token bằng cách set maxAge = 0
-  res.setHeader(
-    "Set-Cookie",
-    cookie.serialize("token", "", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
-      path: "/",
-      maxAge: 0,
-    })
-  );
-
-  response.IsSuccess = true;
-  response.Message = "Logout successful";
-  return res.status(200).json(response);
 }

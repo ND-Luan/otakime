@@ -1,17 +1,19 @@
-import type { NextApiRequest, NextApiResponse } from "next";
-import { PrismaClient, User } from "@prisma/client";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import cookie from "cookie";
+import {
+  ACCESS_TOKEN_EXPIRE,
+  REFRESH_TOKEN_COOKIE_MAX_AGE
+} from "@/lib/auth_config";
+import { prisma } from "@/lib/prisma";
 import { IApiResponse } from "@/types/response";
-
-const prisma = new PrismaClient();
-
+import bcrypt from "bcryptjs";
+import cookie from "cookie";
+import crypto from "crypto";
+import jwt from "jsonwebtoken";
+import type { NextApiRequest, NextApiResponse } from "next";
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  let response: IApiResponse<User> = {
+  const response: IApiResponse<any> = {
     IsSuccess: false,
     Message: "",
     Data: null,
@@ -32,6 +34,9 @@ export default async function handler(
   try {
     const user = await prisma.user.findUnique({
       where: { email },
+      include: {
+        role: true,
+      },
     });
 
     if (!user) {
@@ -40,37 +45,72 @@ export default async function handler(
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
+
     if (!isMatch) {
       response.Message = "Invalid email or password";
       return res.status(401).json(response);
     }
 
-    // Tạo JWT token
-    const token = jwt.sign(
-      { UserId: user.UserId, email: user.email, username: user.username },
-      process.env.JWT_SECRET || "secret",
-      { expiresIn: "7d" }
+    if (!process.env.JWT_SECRET_CLIENT) {
+      throw new Error("JWT_SECRET_CLIENT is not defined");
+    }
+
+    // 🔐 Access token
+    const accessToken = jwt.sign(
+      {
+        UserId: user.UserId,
+        email: user.email,
+        username: user.username,
+        RoleId: user.RoleId,
+      },
+      process.env.JWT_SECRET_CLIENT,
+      { expiresIn: ACCESS_TOKEN_EXPIRE }
     );
 
-    // Set HTTP-only cookie
-    res.setHeader(
-      "Set-Cookie",
-      cookie.serialize("token", token, {
+    // 🔁 Refresh token
+    const refreshToken = crypto.randomBytes(40).toString("hex");
+
+    const refreshExpire = new Date(
+      Date.now() + REFRESH_TOKEN_COOKIE_MAX_AGE * 1000
+    );
+
+    await prisma.refreshToken.create({
+      data: {
+        token: refreshToken,
+        UserId: user.UserId,
+        expiresAt: refreshExpire,
+      },
+    });
+
+    // 🍪 Set cookies
+    res.setHeader("Set-Cookie", [
+      cookie.serialize("token", accessToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 15,
+      }),
+      cookie.serialize("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
         path: "/",
         maxAge: 60 * 60 * 24 * 7,
-      })
-    );
+      }),
+    ]);
+
+    // ❌ Loại bỏ password
+    const { password: _, ...safeUser } = user;
 
     response.IsSuccess = true;
     response.Message = "Login successful";
-    response.Data = user;
-    
+    response.Data = safeUser;
+
     return res.status(200).json(response);
   } catch (error) {
-    response.Message = error!.toString();
+    console.error(error);
+    response.Message = "Internal server error";
     return res.status(500).json(response);
   }
 }

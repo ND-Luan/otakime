@@ -6,51 +6,126 @@ datasource db {
   provider = "sqlserver"
 }
 
+model Permission {
+  PermissionId Int      @id @default(autoincrement())
+  code         String   @unique
+  description  String?
+  createdAt    DateTime @default(now())
+
+  roles RolePermission[]
+}
+
+model RolePermission {
+  RoleId       Int
+  PermissionId Int
+
+  role       Role       @relation(fields: [RoleId], references: [RoleId])
+  permission Permission @relation(fields: [PermissionId], references: [PermissionId])
+
+  @@id([RoleId, PermissionId])
+}
+
 model Role {
-  RoleId        Int      @id @default(autoincrement())
-  name          String   @unique
-  createdAt     DateTime @default(now())
-  createdUserId Int?
-  updatedAt     DateTime @default(now())
-  updatedUserId Int?
-  users         User[]
+  RoleId    Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  users       UserRole[]
+  permissions RolePermission[]
+}
+
+model UserRole {
+  UserId Int
+  RoleId Int
+
+  user User @relation(fields: [UserId], references: [UserId])
+  role Role @relation(fields: [RoleId], references: [RoleId])
+
+  @@id([UserId, RoleId])
+}
+
+model RefreshToken {
+  RefreshTokenId Int      @id @default(autoincrement())
+  token          String   @unique
+  UserId         Int
+  expiresAt      DateTime
+  createdAt      DateTime @default(now())
+
+  user User @relation(fields: [UserId], references: [UserId])
+
+  @@index([UserId])
 }
 
 model User {
-  UserId        Int          @id @default(autoincrement())
-  username      String       @unique
-  email         String       @unique
-  password      String       @db.VarChar(Max)
-  createdAt     DateTime     @default(now())
-  createdUserId Int?
-  updatedAt     DateTime     @default(now())
-  updatedUserId Int?
-  RoleId        Int?
-  favorites     Favorite[]
-  TeamDetail    TeamDetail[]
-  role          Role?        @relation(fields: [RoleId], references: [RoleId])
+  UserId   Int    @id @default(autoincrement())
+  username String @unique
+  email    String @unique
+  password String @db.VarChar(Max)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Global roles
+  roles UserRole[]
+
+  // Team membership
+  teamMembers TeamMember[]
+
+  refreshTokens RefreshToken[]
+  resetToken    String?        @db.VarChar(255)
+  resetExpire   DateTime?
+
+  favorites Favorite[]
 }
 
 model Team {
-  TeamId        Int          @id @default(autoincrement())
-  name          String       @unique
-  createdAt     DateTime     @default(now())
-  createdUserId Int?
-  updatedAt     DateTime     @default(now())
-  updatedUserId Int?
-  TeamDetail    TeamDetail[]
+  TeamId    Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+
+  members TeamMember[]
 }
 
-model TeamDetail {
-  TeamDetailId  Int      @id @default(autoincrement())
-  TeamId        Int
-  UserId        Int
-  createdAt     DateTime @default(now())
-  createdUserId Int?
-  updatedAt     DateTime @default(now())
-  updatedUserId Int?
-  team          Team     @relation(fields: [TeamId], references: [TeamId])
-  user          User     @relation(fields: [UserId], references: [UserId])
+model TeamRole {
+  TeamRoleId Int    @id @default(autoincrement())
+  name       String
+
+  members     TeamMember[]
+  permissions TeamRolePermission[]
+}
+
+model TeamMember {
+  TeamMemberId Int @id @default(autoincrement())
+
+  TeamId     Int
+  UserId     Int
+  TeamRoleId Int
+
+  team     Team     @relation(fields: [TeamId], references: [TeamId])
+  user     User     @relation(fields: [UserId], references: [UserId])
+  teamRole TeamRole @relation(fields: [TeamRoleId], references: [TeamRoleId])
+
+  @@unique([TeamId, UserId, TeamRoleId])
+  @@index([UserId])
+  @@index([TeamId])
+}
+
+model TeamPermission {
+  TeamPermissionId Int     @id @default(autoincrement())
+  code             String  @unique
+  description      String?
+
+  roles TeamRolePermission[]
+}
+
+model TeamRolePermission {
+  TeamRoleId       Int
+  TeamPermissionId Int
+
+  role       TeamRole       @relation(fields: [TeamRoleId], references: [TeamRoleId])
+  permission TeamPermission @relation(fields: [TeamPermissionId], references: [TeamPermissionId])
+
+  @@id([TeamRoleId, TeamPermissionId])
 }
 
 model Movie {
